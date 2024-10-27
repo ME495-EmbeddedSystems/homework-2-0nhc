@@ -46,7 +46,7 @@
         <limit effort="5.0" velocity="1.0" lower="-1.57" upper="1.57"/>
     </joint>
 
-    <joint name="platform_connector_to_stem" type="revolute">
+    <joint name="base_link_to_stem" type="revolute">
         <origin xyz="0 0 ${-base_link_length/2 - stem_height/2}" rpy="0 0 0"/>
         <axis xyz="0 0 1"/>
         <parent link="base_link"/>

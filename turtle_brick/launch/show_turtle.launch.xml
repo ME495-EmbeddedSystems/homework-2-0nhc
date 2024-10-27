@@ -1,15 +1,25 @@
 <launch>
+    <!-- Arguments -->
     <arg name="rviz_config" default="turtle_brick.rviz" description="Customized Rviz configuration file."/>
     <arg name="robot_description_path" default="$(find-pkg-share turtle_brick)/urdf/turtle.urdf.xacro" description="Path to the robot's xacro file."/>
+    <arg name="use_jsp"  default="gui" description="Different types of joint_state_publisher: gui/jsp/none"/>
 
     <!-- Load the robot description -->
     <node pkg="robot_state_publisher" exec="robot_state_publisher" name="rsp" >
         <param name="robot_description" value="$(command '$(exec-in-pkg xacro xacro) $(var robot_description_path)')" />
     </node>
 
-    <!-- Start Joint State Publisher GUI -->
-    <node pkg="joint_state_publisher_gui" exec="joint_state_publisher_gui" name="joint_state_publisher_gui"/>
-    
+    <!-- Start Joint State Publisher -->
+    <node pkg="joint_state_publisher_gui" 
+          exec="joint_state_publisher_gui" 
+          name="joint_state_publisher_gui"
+          if="$(eval '\'$(var use_jsp)\' == \'gui\'')"/>
+    <node pkg="joint_state_publisher" 
+          exec="joint_state_publisher" 
+          name="joint_state_publisher"
+          if="$(eval '\'$(var use_jsp)\' == \'jsp\'')"/>
+
     <!-- Rviz -->
     <node pkg="rviz2" exec="rviz2" args="-d $(find-pkg-share turtle_brick)/rviz/$(var rviz_config)"/>
+
 </launch>
