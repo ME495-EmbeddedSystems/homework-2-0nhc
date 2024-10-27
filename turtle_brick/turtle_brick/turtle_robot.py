@@ -1,14 +1,17 @@
 import rclpy
 import tf_transformations
 import tf2_ros
+import numpy as np
 
 from rclpy.node import Node
 from turtlesim.msg import Pose
 from geometry_msgs.msg import Twist, TransformStamped, PoseStamped
 from sensor_msgs.msg import JointState
-from turtle_brick.states import MOVING, STOPPED
+
+from turtle_brick.states import MOVING, STOPPED, REACHED
 from turtle_brick.holonomic_odometry import HolonomicOdometry
 from turtle_brick.holonomic_controller import HolonomicController
+
 
 class TurtleRobotNode(Node):
     def __init__(self):
@@ -24,7 +27,20 @@ class TurtleRobotNode(Node):
 
         # Declare goal max_velocity parameter, default to 3.0
         self.declare_parameter('max_velocity', 3.0)
-        self._tolerance = self.get_parameter("max_velocity").get_parameter_value().double_value
+        self._max_velocity = self.get_parameter("max_velocity").get_parameter_value().double_value
+        
+        # Declare goal kp parameter, default to 0.1
+        self.declare_parameter('kp', 0.1)
+        self._kp = self.get_parameter("kp").get_parameter_value().double_value
+        
+        # Declare robot urdf parameter, default to 0.1
+        self.declare_parameter('base_link_length', 0.1)
+        self._base_link_length = self.get_parameter("base_link_length").get_parameter_value().double_value
+        self.declare_parameter('stem_height', 0.1)
+        self._stem_height = self.get_parameter("stem_height").get_parameter_value().double_value
+        self.declare_parameter('wheel_radius', 0.1)
+        self._wheel_radius = self.get_parameter("wheel_radius").get_parameter_value().double_value
+        self._base_to_footprint_z = self._stem_height + self._wheel_radius*2 + self._base_link_length/2
 
         # Declare robot name, default to turtle1
         self.declare_parameter('robot_name', 'turtle1')
@@ -47,22 +63,29 @@ class TurtleRobotNode(Node):
         # Setup publisher to control the turtle's movements
         self._turtle_cmd_publisher = self.create_publisher(Twist, self._robot_name+'/cmd_vel', 10)
         self._turtle_cmd = Twist()
+        self._vx = 0
+        self._vy = 0
+        self._th = 0
         
         # Setup publisher to publish joint states
         self._joint_states_publisher = self.create_publisher(JointState, '/joint_states', 10)
         self._joint_states = JointState()
+        self._joint_states.name = ['platform_connector_to_platform', 
+                                   'base_link_to_stem',
+                                   'stem_to_wheel']
         
         # Setup TF broadcaster
         self._tf_broadcaster = tf2_ros.TransformBroadcaster(self)
         
         # Initialize turtle pose
         self._turtle_pose = Pose()
+        self._goal_pose = PoseStamped()
         
         # Initialize state
         self._state = STOPPED
 
         # Initialize motion controller
-        self._controller = HolonomicController()
+        self._controller = HolonomicController(self._max_velocity, self._kp)
         
         
     def _timer_callback(self):
@@ -73,7 +96,7 @@ class TurtleRobotNode(Node):
         t.child_frame_id = 'base_link'
         t.transform.translation.x = self._turtle_pose.x
         t.transform.translation.y = self._turtle_pose.y
-        t.transform.translation.z = 0.0
+        t.transform.translation.z = self._base_to_footprint_z
         q = tf_transformations.quaternion_from_euler(0, 0, self._turtle_pose.theta)
         t.transform.rotation.x = q[0]
         t.transform.rotation.y = q[1]
@@ -81,28 +104,40 @@ class TurtleRobotNode(Node):
         t.transform.rotation.w = q[3]
         self._tf_broadcaster.sendTransform(t)
         
-        # Publish joint states
-        self._joint_states.header.stamp = self.get_clock().now().to_msg()
-        self._joint_states.name = ['platform_connector_to_platform', 
-                                   'base_link_to_stem',
-                                   'stem_to_wheel']
-        self._joint_states.position = [0, 0, 0]
-        self._joint_states.velocity = [0, 0, 0]
-        self._joint_states.effort = [0, 0, 0]
-        self._joint_states_publisher.publish(self._joint_states)
-        
         # Publish control commands
         if(self._state == MOVING):
             # Use planner to calc control commands
-            pass
-        
+            current_state = [self._turtle_pose.x, self._turtle_pose.y, self._turtle_pose.theta]
+            goal_pose = [self._goal_pose.pose.position.x, self._goal_pose.pose.position.y]
+            self._vx, self._vy, self._th = self._controller.holonomic_control(current_state, goal_pose)
+            self._turtle_cmd.linear.x = self._vx
+            self._turtle_cmd.linear.y = self._vy
+            
         elif(self._state == STOPPED):
+            self._turtle_cmd = Twist()
+        
+        elif(self._state == REACHED):
             self._turtle_cmd = Twist()
             
         else:
             self.get_logger().warn("Unknown state: "+str(self._state))
             
         self._turtle_cmd_publisher.publish(self._turtle_cmd)
+        
+        # Publish joint states
+        self._joint_states.header.stamp = self.get_clock().now().to_msg()
+        self._joint_states.position = [0, self._th, 0]
+        self._joint_states.velocity = [0, 0, 0]
+        self._joint_states.effort = [0, 0, 0]
+        self._joint_states_publisher.publish(self._joint_states)
+        
+        # Check if goal is reached
+        if(self._state == MOVING):
+            p1 = [self._turtle_pose.x, self._turtle_pose.y]
+            p2 = [self._goal_pose.pose.position.x, self._goal_pose.pose.position.y]
+            if(self._euclidean_distance(p1, p2) < self._tolerance):
+                self._state = REACHED
+                self.get_logger().info("Goal reached")
     
     
     def _goal_pose_callback(self, msg):
@@ -113,7 +148,12 @@ class TurtleRobotNode(Node):
         
         
     def _turtle_pose_callback(self, msg):
-        self._turtle_pose = msg
+        self._turtle_pose.x = msg.x
+        self._turtle_pose.y = msg.y
+        
+        
+    def _euclidean_distance(self, p1, p2):
+        return np.sqrt(((p1[0] - p2[0])**2 + (p1[1] - p2[1])**2))
         
         
 def main(args=None):

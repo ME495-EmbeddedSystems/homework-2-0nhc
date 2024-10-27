@@ -1,6 +1,6 @@
 <robot name="base_link" xmlns:xacro="http://www.ros.org/wiki/xacro">
     <xacro:property name="yaml_file" value="$(find turtle_brick)/config/turtle.yaml" />
-    <xacro:property name="props" value="${xacro.load_yaml(yaml_file)}" />
+    <xacro:property name="props" value="${xacro.load_yaml(yaml_file)['/**']['ros__parameters']}" />
     <xacro:property name="stem_radius"  value="${props['stem_radius']}" />
     <xacro:property name="stem_height"  value="${props['stem_height']}" />
     

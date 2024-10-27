@@ -27,7 +27,8 @@ setup(
     entry_points={
         'console_scripts': [
             'arena = turtle_brick.arena:main',
-            'turtle_robot = turtle_brick.turtle_robot:main'
+            'turtle_robot = turtle_brick.turtle_robot:main',
+            'dummy = turtle_brick.dummy:main',
         ],
     },
 )

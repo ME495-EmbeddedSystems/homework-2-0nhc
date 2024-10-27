@@ -1,25 +1,31 @@
-# The length of the base link cube
-base_link_length: 0.3
-# The height from the platform to the ground
-platform_height: 0.5
-# The radius of the platform cylinder
-platform_cylinder_radius: 0.3
-# The height of the platform cylinder
-platform_cylinder_height: 0.03
-# The ratio: platform_connector_radius / platform_cylinder_radius
-platform_connector_radius_ratio: 0.1
-# The radius of the stem
-stem_radius: 0.05
-# The height of the stem
-stem_height: 0.03
-# The radius of the wheel
-wheel_radius: 0.15
-# The height of the wheel
-wheel_height: 0.05
-
-turtle_control:
+/**:
   ros__parameters:
-    frequency: 50.0
+    # Main loop frequency
+    frequency: 100.0
+    # The maximum velocity of the robot
     max_velocity: 5.0
+    # kp for holonomic control
+    kp: 0.1
+    # The maximum angular velocity of the robot
     tolerance: 0.05
+    # The name of the robot
     robot_name: 'turtle1'
+
+    # The length of the base link cube
+    base_link_length: 0.3
+    # The height from the platform to the ground
+    platform_height: 0.5
+    # The radius of the platform cylinder
+    platform_cylinder_radius: 0.3
+    # The height of the platform cylinder
+    platform_cylinder_height: 0.03
+    # The ratio: platform_connector_radius / platform_cylinder_radius
+    platform_connector_radius_ratio: 0.1
+    # The radius of the stem
+    stem_radius: 0.05
+    # The height of the stem
+    stem_height: 0.03
+    # The radius of the wheel
+    wheel_radius: 0.15
+    # The height of the wheel
+    wheel_height: 0.05

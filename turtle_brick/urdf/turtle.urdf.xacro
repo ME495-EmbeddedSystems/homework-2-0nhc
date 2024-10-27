@@ -2,7 +2,7 @@
 <robot name="turtle" xmlns:xacro="http://www.ros.org/wiki/xacro">
     <!-- Load the turtle.yaml file -->
     <xacro:property name="yaml_file" value="$(find turtle_brick)/config/turtle.yaml" />
-    <xacro:property name="props" value="${xacro.load_yaml(yaml_file)}" />
+    <xacro:property name="props" value="${xacro.load_yaml(yaml_file)['/**']['ros__parameters']}" />
 
 
     <!-- Load xacro properties -->
@@ -29,6 +29,7 @@
     <xacro:platform name="platform"/>
     <xacro:stem name="stem"/>
     <xacro:wheel name="wheel"/>
+    <link name="base_footprint"/>
     
 
     <!-- Define joints -->
@@ -60,6 +61,12 @@
         <parent link="stem"/>
         <child link="wheel"/>
         <limit effort="5.0" velocity="1.0" lower="-1.57" upper="1.57"/>
+    </joint>
+
+    <joint name="base_link_to_base_footprint" type="fixed">
+        <origin xyz="0 0 -${base_link_length/2 + stem_height + wheel_radius*2}" rpy="0 0 0"/>
+        <parent link="base_link"/>
+        <child link="base_footprint"/>
     </joint>
 
 </robot>

@@ -2,22 +2,29 @@
     <!-- Arguments -->
     <arg name="rviz_config" default="turtle_brick.rviz" description="Customized Rviz configuration file."/>
     <arg name="robot_description_path" default="$(find-pkg-share turtle_brick)/urdf/turtle.urdf.xacro" description="Path to the robot's xacro file."/>
+    
     <arg name="use_jsp"  default="gui" description="Different types of joint_state_publisher: gui/jsp/none"/>
+    <arg name="publish_freq" default="100.0" description="Publish frequency."/>
 
     <!-- Load the robot description -->
     <node pkg="robot_state_publisher" exec="robot_state_publisher" name="rsp" >
         <param name="robot_description" value="$(command '$(exec-in-pkg xacro xacro) $(var robot_description_path)')" />
+        <param name="publish_frequency" value="$(var publish_freq)"/>
     </node>
 
     <!-- Start Joint State Publisher -->
     <node pkg="joint_state_publisher_gui" 
           exec="joint_state_publisher_gui" 
           name="joint_state_publisher_gui"
-          if="$(eval '\'$(var use_jsp)\' == \'gui\'')"/>
+          if="$(eval '\'$(var use_jsp)\' == \'gui\'')">
+        <param name="rate" value="$(var publish_freq)"/>
+    </node>
     <node pkg="joint_state_publisher" 
           exec="joint_state_publisher" 
           name="joint_state_publisher"
-          if="$(eval '\'$(var use_jsp)\' == \'jsp\'')"/>
+          if="$(eval '\'$(var use_jsp)\' == \'jsp\'')">
+        <param name="rate" value="$(var publish_freq)"/>
+    </node>
 
     <!-- Rviz -->
     <node pkg="rviz2" exec="rviz2" args="-d $(find-pkg-share turtle_brick)/rviz/$(var rviz_config)"/>

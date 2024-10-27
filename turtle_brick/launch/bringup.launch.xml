@@ -7,4 +7,6 @@
 
     <include file="$(find-pkg-share turtle_brick)/launch/run_turtle.launch.xml"/>
 
+    <node pkg="turtle_brick" exec="dummy" name="dummy" output="screen"/>
+
 </launch>
