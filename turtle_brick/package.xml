@@ -4,8 +4,8 @@
   <name>turtle_brick</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
-  <maintainer email="thefoxfoxfox@outlook.com">zhengxiao-han</maintainer>
-  <license>TODO: License declaration</license>
+  <maintainer email="hanzx@u.northwestern.edu">Zhengxiao Han</maintainer>
+  <license>WTFPL</license>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
