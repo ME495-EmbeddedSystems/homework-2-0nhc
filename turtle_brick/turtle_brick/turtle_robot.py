@@ -7,6 +7,7 @@ from rclpy.node import Node
 from turtlesim.msg import Pose
 from geometry_msgs.msg import Twist, TransformStamped, PoseStamped
 from sensor_msgs.msg import JointState
+from turtle_brick_interfaces.msg import Tilt
 
 from turtle_brick.states import MOVING, STOPPED, REACHED
 from turtle_brick.holonomic_odometry import HolonomicOdometry
@@ -56,9 +57,14 @@ class TurtleRobotNode(Node):
         self._turtle_pose_subscriber = self.create_subscription(Pose, self._robot_name+'/pose', self._turtle_pose_callback, 10)
         self._turtle_pose_subscriber  # prevent unused variable warning
         
-        # Setup subscriber for turtle's gpal pose
+        # Setup subscriber for turtle's goal pose
         self._goal_pose_subscriber = self.create_subscription(PoseStamped, '/goal_pose', self._goal_pose_callback, 10)
         self._goal_pose_subscriber  # prevent unused variable warning
+        
+        # Setup subscriber for tilt's angle
+        self._tilt_subscriber = self.create_subscription(Tilt, '/tilt', self._tilt_callback, 10)
+        self._tilt_subscriber  # prevent unused variable warning
+        self._tilt_angle = 0
         
         # Setup publisher to control the turtle's movements
         self._turtle_cmd_publisher = self.create_publisher(Twist, self._robot_name+'/cmd_vel', 10)
@@ -126,7 +132,7 @@ class TurtleRobotNode(Node):
         
         # Publish joint states
         self._joint_states.header.stamp = self.get_clock().now().to_msg()
-        self._joint_states.position = [0, self._th, 0]
+        self._joint_states.position = [self._tilt_angle, self._th, 0]
         self._joint_states.velocity = [0, 0, 0]
         self._joint_states.effort = [0, 0, 0]
         self._joint_states_publisher.publish(self._joint_states)
@@ -150,6 +156,10 @@ class TurtleRobotNode(Node):
     def _turtle_pose_callback(self, msg):
         self._turtle_pose.x = msg.x
         self._turtle_pose.y = msg.y
+    
+    
+    def _tilt_callback(self, msg):
+        self._tilt_angle = msg.angle
         
         
     def _euclidean_distance(self, p1, p2):

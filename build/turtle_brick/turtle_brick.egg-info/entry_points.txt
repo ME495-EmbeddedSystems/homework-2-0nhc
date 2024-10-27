@@ -1,2 +1,0 @@
-[console_scripts]
-arena = turtle_brick.arena:main
