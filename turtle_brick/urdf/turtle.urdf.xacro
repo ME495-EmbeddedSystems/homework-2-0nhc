@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<robot name="turtle" xmlns:xacro="http://www.ros.org/wiki/xacro">
+    <xacro:property name="yaml_file" value="$(find turtle_brick)/config/turtle.yaml" />
+    <xacro:property name="props" value="${xacro.load_yaml(yaml_file)}" />
+    <xacro:property name="base_link_length"  value="${props['base_link_length']}" />
+    
+    <xacro:include filename="$(find turtle_brick)/urdf/_base_link.urdf.xacro" />
+
+    <xacro:base_link base_link_length="${base_link_length}"/>
+
+</robot>

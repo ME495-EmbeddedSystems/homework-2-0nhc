@@ -1,0 +1,4 @@
+/**:
+  ros__parameters:
+    base_link_length: 0.1
+    platform_height: 0.1

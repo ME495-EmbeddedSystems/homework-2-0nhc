@@ -1,4 +1,11 @@
 <launch>
-    <node pkg="turtlesim" type="turtlesim_node" name="turtlesim" output="screen"/>
-    <node pkg="turtle_brick" type="show_turtle" name="show_turtle" output="screen"/>
+    <arg name="rviz_config" default="turtle_brick.rviz" description="Customized Rviz configuration file."/>
+    <!-- <arg name="robot_description_path" default="$(find-pkg-share turtle_brick)/urdf/turtle.urdf.xacro" description="Path to the robot's xacro file."/> -->
+
+    <node pkg="robot_state_publisher" exec="robot_state_publisher" name="rsp" >
+        <param name="robot_description" value="$(command '$(exec-in-pkg xacro xacro) $(find-pkg-share turtle_brick)/urdf/_base_link.urdf.xacro')" />
+    </node>
+
+    <!-- Rviz -->
+    <node pkg="rviz2" exec="rviz2" args="-d $(find-pkg-share turtle_brick)/rviz/$(var rviz_config)"/>
 </launch>
