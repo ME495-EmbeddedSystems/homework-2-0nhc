@@ -8,7 +8,7 @@ from geometry_msgs.msg import Twist, TransformStamped, PoseStamped
 from sensor_msgs.msg import JointState
 from turtle_brick.states import MOVING, STOPPED
 from turtle_brick.holonomic_odometry import HolonomicOdometry
-
+from turtle_brick.holonomic_controller import HolonomicController
 
 class TurtleRobotNode(Node):
     def __init__(self):
@@ -21,6 +21,10 @@ class TurtleRobotNode(Node):
         # Declare goal tolerance parameter, default to 0.1
         self.declare_parameter('tolerance', 0.1)
         self._tolerance = self.get_parameter("tolerance").get_parameter_value().double_value
+
+        # Declare goal max_velocity parameter, default to 3.0
+        self.declare_parameter('max_velocity', 3.0)
+        self._tolerance = self.get_parameter("max_velocity").get_parameter_value().double_value
 
         # Declare robot name, default to turtle1
         self.declare_parameter('robot_name', 'turtle1')
@@ -56,6 +60,9 @@ class TurtleRobotNode(Node):
         
         # Initialize state
         self._state = STOPPED
+
+        # Initialize motion controller
+        self._controller = HolonomicController()
         
         
     def _timer_callback(self):
@@ -99,7 +106,10 @@ class TurtleRobotNode(Node):
     
     
     def _goal_pose_callback(self, msg):
-        self._goal_pose = msg
+        if(self._state == STOPPED):
+            self._state = MOVING
+        elif(self._state == MOVING):
+            self._goal_pose = msg
         
         
     def _turtle_pose_callback(self, msg):

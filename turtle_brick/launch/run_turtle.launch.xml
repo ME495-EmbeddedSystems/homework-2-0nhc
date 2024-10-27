@@ -4,6 +4,6 @@
 
     <!-- Launch Turtle Robot -->
     <node pkg="turtle_brick" exec="turtle_robot" name="turtle_robot" output="screen">
-        <param name="frequency" value="10.0"/>
+        <param from="$(find-pkg-share turtle_brick)/config/turtle.yaml"/>
     </node>
 </launch>
