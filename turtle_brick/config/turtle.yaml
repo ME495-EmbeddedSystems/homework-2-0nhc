@@ -1,4 +1,18 @@
-/**:
-  ros__parameters:
-    base_link_length: 0.1
-    platform_height: 0.1
+# The length of the base link cube
+base_link_length: 0.1
+# The height from the platform to the ground
+platform_height: 0.15
+# The radius of the platform cylinder
+platform_cylinder_radius: 0.1
+# The height of the platform cylinder
+platform_cylinder_height: 0.02
+# The ratio: platform_connector_radius / platform_cylinder_radius
+platform_connector_radius_ratio: 0.1
+# The radius of the stem
+stem_radius: 0.03
+# The height of the stem
+stem_height: 0.02
+# The radius of the wheel
+wheel_radius: 0.05
+# The height of the wheel
+wheel_height: 0.02

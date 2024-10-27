@@ -1,0 +1,22 @@
+<robot name="base_link" xmlns:xacro="http://www.ros.org/wiki/xacro">
+    <xacro:property name="yaml_file" value="$(find turtle_brick)/config/turtle.yaml" />
+    <xacro:property name="props" value="${xacro.load_yaml(yaml_file)}" />
+    <xacro:property name="platform_cylinder_radius"  value="${props['platform_cylinder_radius']}" />
+    <xacro:property name="platform_cylinder_height"  value="${props['platform_cylinder_height']}" />
+    
+
+    <xacro:macro name="platform" params="name">
+        <link name="${name}">
+            <visual>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <geometry>
+                    <cylinder radius="${platform_cylinder_radius}" length="${platform_cylinder_height}"/>
+                </geometry>
+                <material name="platform_color">
+                    <color rgba="1.0 0.0 1.0 1.0"/>
+                </material>
+            </visual>
+        </link>
+    </xacro:macro>
+
+</robot>

@@ -1,11 +1,65 @@
 <?xml version="1.0"?>
 <robot name="turtle" xmlns:xacro="http://www.ros.org/wiki/xacro">
+    <!-- Load the turtle.yaml file -->
     <xacro:property name="yaml_file" value="$(find turtle_brick)/config/turtle.yaml" />
     <xacro:property name="props" value="${xacro.load_yaml(yaml_file)}" />
-    <xacro:property name="base_link_length"  value="${props['base_link_length']}" />
-    
-    <xacro:include filename="$(find turtle_brick)/urdf/_base_link.urdf.xacro" />
 
-    <xacro:base_link base_link_length="${base_link_length}"/>
+
+    <!-- Load xacro properties -->
+    <xacro:property name="base_link_length"  value="${props['base_link_length']}" />
+    <xacro:property name="platform_cylinder_height"  value="${props['platform_cylinder_height']}" />
+    <xacro:property name="platform_height"  value="${props['platform_height']}" />
+    <xacro:property name="stem_height"  value="${props['stem_height']}" />
+    <xacro:property name="wheel_radius"  value="${props['wheel_radius']}" />
+    
+    <xacro:property name="platform_connector_height"  value="${platform_height - base_link_length/2 - platform_cylinder_height/2}" />
+
+
+    <!-- Include xacro macros -->
+    <xacro:include filename="$(find turtle_brick)/urdf/_base_link.urdf.xacro" />
+    <xacro:include filename="$(find turtle_brick)/urdf/_platform.urdf.xacro" />
+    <xacro:include filename="$(find turtle_brick)/urdf/_platform_connector.urdf.xacro" />
+    <xacro:include filename="$(find turtle_brick)/urdf/_stem.urdf.xacro" />
+    <xacro:include filename="$(find turtle_brick)/urdf/_wheel.urdf.xacro" />
+
+
+    <!-- Call macros to generate robot links -->
+    <xacro:base_link name="base_link"/>
+    <xacro:platform_connector name="platform_connector"/>
+    <xacro:platform name="platform"/>
+    <xacro:stem name="stem"/>
+    <xacro:wheel name="wheel"/>
+    
+
+    <!-- Define joints -->
+    <joint name="base_link_to_platform_connector" type="fixed">
+        <origin xyz="0 0 ${base_link_length/2 + platform_connector_height/2}" rpy="0 0 0"/>
+        <parent link="base_link"/>
+        <child link="platform_connector"/>
+    </joint>
+
+    <joint name="platform_connector_to_platform" type="revolute">
+        <origin xyz="0 0 ${platform_connector_height/2 + platform_cylinder_height/2}" rpy="0 0 0"/>
+        <axis xyz="0 1 0"/>
+        <parent link="platform_connector"/>
+        <child link="platform"/>
+        <limit effort="5.0" velocity="1.0" lower="-1.57" upper="1.57"/>
+    </joint>
+
+    <joint name="platform_connector_to_stem" type="revolute">
+        <origin xyz="0 0 ${-base_link_length/2 - stem_height/2}" rpy="0 0 0"/>
+        <axis xyz="0 0 1"/>
+        <parent link="base_link"/>
+        <child link="stem"/>
+        <limit effort="5.0" velocity="1.0" lower="-1.57" upper="1.57"/>
+    </joint>
+
+    <joint name="stem_to_wheel" type="revolute">
+        <origin xyz="0 0 ${-stem_height/2 - wheel_radius}" rpy="0 0 0"/>
+        <axis xyz="0 1 0"/>
+        <parent link="stem"/>
+        <child link="wheel"/>
+        <limit effort="5.0" velocity="1.0" lower="-1.57" upper="1.57"/>
+    </joint>
 
 </robot>

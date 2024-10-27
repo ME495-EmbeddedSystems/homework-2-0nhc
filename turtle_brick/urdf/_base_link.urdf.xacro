@@ -1,39 +1,20 @@
 <robot name="base_link" xmlns:xacro="http://www.ros.org/wiki/xacro">
     <xacro:property name="yaml_file" value="$(find turtle_brick)/config/turtle.yaml" />
-    <xacro:property name="props" value="${xacro.load_yaml(${yaml_file})['/**']['ros__parameters']}" />
-    <xacro:property name="base_link_length"  value="float(props['base_link_length'])" />
+    <xacro:property name="props" value="${xacro.load_yaml(yaml_file)}" />
+    <xacro:property name="base_link_length"  value="${props['base_link_length']}" />
     
 
-    <!-- <xacro:macro name="base_link" params="base_link_length">
-        <link name="base_link">
+    <xacro:macro name="base_link" params="name">
+        <link name="${name}">
             <visual>
                 <geometry>
                     <box size="${base_link_length} ${base_link_length} ${base_link_length}"/>
                 </geometry>
                 <material name="base_link_color">
-                    <color rgba="0.5 0.5 0.0 1.0"/>
+                    <color rgba="1.0 1.0 0.0 1.0"/>
                 </material>
             </visual>
         </link>
-    </xacro:macro> -->
+    </xacro:macro>
 
-    <!-- <xacro:base_link base_link_length="${base_link_length}"/> -->
-
-    <link name="base_link">
-        <visual>
-            <geometry>
-                <box size="${base_link_length} ${base_link_length} ${base_link_length}"/>
-            </geometry>
-            <material name="base_link_color">
-                <color rgba="0.5 0.5 0.0 1.0"/>
-            </material>
-        </visual>
-    </link>
-
-    <link name="world"/>
-
-    <joint name="w2b" type="fixed">
-        <parent link="world"/>
-        <child link="base_link"/>
-    </joint>
 </robot>
