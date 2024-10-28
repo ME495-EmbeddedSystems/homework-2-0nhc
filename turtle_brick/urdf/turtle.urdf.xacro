@@ -12,7 +12,7 @@
     <xacro:property name="stem_height"  value="${props['stem_height']}" />
     <xacro:property name="wheel_radius"  value="${props['wheel_radius']}" />
     
-    <xacro:property name="platform_connector_height"  value="${platform_height - base_link_length/2 - platform_cylinder_height/2}" />
+    <xacro:property name="platform_connector_height"  value="${platform_height - platform_cylinder_height - base_link_length - stem_height - wheel_radius*2}" />
 
 
     <!-- Include xacro macros -->

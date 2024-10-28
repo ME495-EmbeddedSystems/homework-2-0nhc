@@ -7,22 +7,15 @@ from turtle_brick_interfaces.msg import Tilt
 class DummyNode(Node):
 
     def __init__(self):
-        super().__init__('dummy')
+        super().__init__('debug_goal_pose')
         
         # Setup ROS 2 Timer
         self._timer = self.create_timer(0.01, self._timer_callback)
         
         # Setup ROS 2 Publisher
-        self._dummy_publisher = self.create_publisher(PoseStamped, '/goal_pose', 10)
         self._tilt_publisher = self.create_publisher(Tilt, '/tilt', 10)
         
     def _timer_callback(self):
-        msg = PoseStamped()
-        msg.header.frame_id = 'odom'
-        msg.pose.position.x = 0.0
-        msg.pose.position.y = 0.0
-        self._dummy_publisher.publish(msg)
-        
         msg = Tilt()
         msg.angle = 0.5
         self._tilt_publisher.publish(msg)

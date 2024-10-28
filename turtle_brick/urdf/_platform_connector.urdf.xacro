@@ -7,9 +7,11 @@
     <xacro:property name="connector_height"  value="${math.sqrt(platform_cylinder_radius**2+(platform_cylinder_height/2)**2)}" />
     <xacro:property name="platform_connector_radius_ratio"  value="${props['platform_connector_radius_ratio']}" />
     <xacro:property name="platform_height"  value="${props['platform_height']}" />
+    <xacro:property name="stem_height"  value="${props['stem_height']}" />
+    <xacro:property name="wheel_radius"  value="${props['wheel_radius']}" />
 
     <xacro:property name="radius"  value="${platform_cylinder_radius*platform_connector_radius_ratio}" />
-    <xacro:property name="length"  value="${platform_height - base_link_length/2 - platform_cylinder_height/2}" />
+    <xacro:property name="length"  value="${platform_height - platform_cylinder_height - base_link_length - stem_height - wheel_radius*2}" />
     
 
     <xacro:macro name="platform_connector" params="name">

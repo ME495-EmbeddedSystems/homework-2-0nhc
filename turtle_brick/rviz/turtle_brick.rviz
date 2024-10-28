@@ -8,7 +8,7 @@ Panels:
         - /TF1
         - /TF1/Frames1
       Splitter Ratio: 0.5
-    Tree Height: 610
+    Tree Height: 361
   - Class: rviz_common/Selection
     Name: Selection
   - Class: rviz_common/Tool Properties
@@ -109,6 +109,8 @@ Visualization Manager:
           Value: false
         base_link:
           Value: true
+        brick:
+          Value: true
         odom:
           Value: true
         platform:
@@ -128,6 +130,8 @@ Visualization Manager:
       Show Names: true
       Tree:
         world:
+          brick:
+            {}
           odom:
             base_link:
               base_footprint:
@@ -156,7 +160,7 @@ Visualization Manager:
       Enabled: true
       Name: Marker
       Namespaces:
-        {}
+        boundary: true
       Topic:
         Depth: 5
         Durability Policy: Volatile
@@ -218,9 +222,9 @@ Visualization Manager:
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 1.277583360671997
-        Y: 6.5036139488220215
-        Z: -2.7355215549468994
+        X: 5.3568434715271
+        Y: 7.488488674163818
+        Z: -4.474983215332031
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false

@@ -14,7 +14,7 @@
     # The length of the base link cube
     base_link_length: 0.3
     # The height from the platform to the ground
-    platform_height: 0.5
+    platform_height: 1.0
     # The radius of the platform cylinder
     platform_cylinder_radius: 0.3
     # The height of the platform cylinder
