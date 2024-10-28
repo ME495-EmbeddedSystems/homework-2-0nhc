@@ -1,3 +1,9 @@
+# TODO
+* Rviz launch order
+* Collision and friction effects
+* Description in setup.py and package.xml
+
+
 # ME495 Embedded Systems Homework 2
 Author: Zhengxiao Han
 

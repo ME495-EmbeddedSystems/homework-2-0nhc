@@ -11,7 +11,7 @@
     # The name of the robot
     robot_name: 'turtle1'
     # number of markers per side
-    num_markers_per_side: 20
+    num_markers_per_side: 100
     # The frequency for the rainbow
     rainbow_frequency: 200.0    
 
