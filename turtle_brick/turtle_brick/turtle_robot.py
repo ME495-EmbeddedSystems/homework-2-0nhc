@@ -11,7 +11,6 @@ from turtle_brick_interfaces.msg import Tilt
 from std_srvs.srv import Empty
 
 from turtle_brick.states import MOVING, STOPPED, REACHED
-from turtle_brick.holonomic_odometry import HolonomicOdometry
 from turtle_brick.holonomic_controller import HolonomicController
 
 
