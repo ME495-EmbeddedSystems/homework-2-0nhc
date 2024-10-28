@@ -28,6 +28,7 @@ setup(
         'console_scripts': [
             'arena = turtle_brick.arena:main',
             'turtle_robot = turtle_brick.turtle_robot:main',
+            'catcher = turtle_brick.catcher:main',
             'debug_goal_pose = turtle_brick.debug_goal_pose:main',
             'debug_tilt = turtle_brick.debug_tilt:main',
         ],

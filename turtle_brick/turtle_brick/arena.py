@@ -5,12 +5,13 @@ from geometry_msgs.msg import Point, PoseStamped
 import tf_transformations
 import numpy as np
 import tf2_ros
-from turtle_brick.states import INIT, PLACED, DROPPING, DROPPED, FALLING, SLIDING
+from turtle_brick.states import INIT, PLACED, DROPPING, DROPPED, FALLING
 from turtle_brick.physics import World
 from turtle_brick_interfaces.srv import Place
 from turtle_brick_interfaces.msg import Tilt
-from std_srvs.srv import Empty 
+from std_srvs.srv import Empty
 from turtlesim.msg import Pose
+from std_msgs.msg import Float32
 
 
 class ArenaNode(Node):
@@ -60,7 +61,10 @@ class ArenaNode(Node):
             self._robot_name = self._robot_name[1:]
         
         # Setup Main Loop Timer
-        self._timer = self.create_timer(1.0/self._timer_frequency, self._timer_callback)
+        self._main_loop_timer = self.create_timer(1.0/self._timer_frequency, self._main_loop_timer_callback)
+        
+        # Setup Physics Timer
+        self._physics_timer = self.create_timer(1.0/self._timer_frequency, self._physics_timer_callback)
         
         # Setup Boundaries Publisher
         self._boundaries_publisher = self.create_publisher(MarkerArray, '/boundaries', 10)
@@ -83,6 +87,10 @@ class ArenaNode(Node):
                                                    self._brick_size_y, 
                                                    self._brick_size_z,
                                                    r=1.0, g=0.0, b=0.0, a=1.0)
+        
+        # Setup Arena State Publisher
+        self._arena_state_publisher = self.create_publisher(Float32, '/arena_state', 10)
+        self._arena_state_msg = Float32()
         
         # Setup subscriber for turtle's pose state
         self._turtle_pose_subscriber = self.create_subscription(Pose, self._robot_name+'/pose', self._turtle_pose_callback, 10)
@@ -226,7 +234,11 @@ class ArenaNode(Node):
         return marker
         
         
-    def _timer_callback(self):
+    def _main_loop_timer_callback(self):
+        # Publish arena state
+        self._arena_state_msg.data = float(self._state)
+        self._arena_state_publisher.publish(self._arena_state_msg)
+        
         # Publish boundaries
         self._boundaries_publisher.publish(self._boundaries)
         
@@ -255,7 +267,26 @@ class ArenaNode(Node):
             t.transform.rotation.z = self._brick_pose.pose.orientation.z
             t.transform.rotation.w = self._brick_pose.pose.orientation.w
             self._tf_broadcaster.sendTransform(t)
-            
+             
+        if(self._state == FALLING):
+            R = 0.0
+            P = self._tilt_angle
+            Y = 0.0
+            q = tf_transformations.quaternion_from_euler(R, P, Y)
+            self._brick_pose.pose.orientation.x = q[0]
+            self._brick_pose.pose.orientation.y = q[1]
+            self._brick_pose.pose.orientation.z = q[2]
+            self._brick_pose.pose.orientation.w = q[3]
+            self._brick_marker.pose.orientation.x = q[0]
+            self._brick_marker.pose.orientation.y = q[1]
+            self._brick_marker.pose.orientation.z = q[2]
+            self._brick_marker.pose.orientation.w = q[3]
+        
+        if(self._tilt_angle != 0.0 and self._state == DROPPED):
+            self._state = FALLING
+    
+    
+    def _physics_timer_callback(self):
         if(self._state == DROPPING):
             # Check if brick is inside the platform
             distance = np.sqrt((self._brick_pose.pose.position.x - self._turtle_pose.x)**2+
@@ -277,29 +308,12 @@ class ArenaNode(Node):
             # Move brick with the turtle
             self._physics.brick = [self._turtle_pose.x + self._x_offset, self._turtle_pose.y + self._y_offset, self._platform_height + self._brick_size_z/2]
         
-        elif(self._state == FALLING):
-            R = 0.0
-            P = self._tilt_angle
-            Y = 0.0
-            q = tf_transformations.quaternion_from_euler(R, P, Y)
-            self._brick_pose.pose.orientation.x = q[0]
-            self._brick_pose.pose.orientation.y = q[1]
-            self._brick_pose.pose.orientation.z = q[2]
-            self._brick_pose.pose.orientation.w = q[3]
-            self._brick_marker.pose.orientation.x = q[0]
-            self._brick_marker.pose.orientation.y = q[1]
-            self._brick_marker.pose.orientation.z = q[2]
-            self._brick_marker.pose.orientation.w = q[3]
-            
+        elif(self._state == FALLING):            
             dx = self._brick_pose.pose.position.x - self._turtle_pose.x
             self._physics_z_limit = self._platform_height + self._brick_size_z/2 - dx*np.tan(self._tilt_angle)
             self._physics_pitch = self._tilt_angle
             self._physics._brick = self._physics.drop(z_limit=self._physics_z_limit, pitch=self._physics_pitch)
             
-        
-        if(self._tilt_angle != 0.0 and self._state == DROPPED):
-            self._state = FALLING
-                
 
 def main(args=None):
     rclpy.init(args=args)
