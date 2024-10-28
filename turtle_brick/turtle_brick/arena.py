@@ -5,6 +5,8 @@ from geometry_msgs.msg import Point, PoseStamped
 import tf_transformations
 import numpy as np
 import tf2_ros
+from turtle_brick.states import INIT
+from turtle_brick.physics import World
 
 
 class ArenaNode(Node):
@@ -13,7 +15,8 @@ class ArenaNode(Node):
         super().__init__('arena')
         
         # Setup Main Loop Timer
-        self._timer = self.create_timer(0.01, self._timer_callback)
+        frequency = 250.0
+        self._timer = self.create_timer(1.0/frequency, self._timer_callback)
         
         # Setup Boundaries Publisher
         self._boundaries_publisher = self.create_publisher(MarkerArray, '/boundaries', 10)
@@ -46,6 +49,17 @@ class ArenaNode(Node):
         
         # Setup TF Broadcaster
         self._tf_broadcaster = tf2_ros.TransformBroadcaster(self)
+        
+        # Initialize arena state
+        self._state = INIT
+        
+        # Initialize physics
+        radius = 0.3
+        gravity = -9.81
+        self._physics = World([self._brick_pose.pose.position.x,
+                             self._brick_pose.pose.position.y,
+                             self._brick_pose.pose.position.z], 
+                            gravity, radius, 1.0/frequency)
     
     
     def _init_boundaries(self, num_markers_per_side, boundary_width, arena_width, arena_height):
@@ -135,22 +149,31 @@ class ArenaNode(Node):
         # Publish boundaries
         self._boundaries_publisher.publish(self._boundaries)
         
-        # Publish brick
-        self._brick_publisher.publish(self._brick_marker)
+        # Update brick pose
+        self._brick_pose.pose.position.x = self._physics.brick[0]
+        self._brick_pose.pose.position.y = self._physics.brick[1]
+        self._brick_pose.pose.position.z = self._physics.brick[2]
         
-        # Broadcast TF
-        t = tf2_ros.TransformStamped()
-        t.header.stamp = self.get_clock().now().to_msg()
-        t.header.frame_id = 'world'
-        t.child_frame_id = 'brick'
-        t.transform.translation.x = self._brick_pose.pose.position.x
-        t.transform.translation.y = self._brick_pose.pose.position.y
-        t.transform.translation.z = self._brick_pose.pose.position.z
-        t.transform.rotation.x = self._brick_pose.pose.orientation.x
-        t.transform.rotation.y = self._brick_pose.pose.orientation.y
-        t.transform.rotation.z = self._brick_pose.pose.orientation.z
-        t.transform.rotation.w = self._brick_pose.pose.orientation.w
-        self._tf_broadcaster.sendTransform(t)
+        if(self._state != INIT):    
+            # Publish brick
+            self._brick_marker.pose.position.x = self._brick_pose.pose.position.x
+            self._brick_marker.pose.position.y = self._brick_pose.pose.position.y
+            self._brick_marker.pose.position.z = self._brick_pose.pose.position.z
+            self._brick_publisher.publish(self._brick_marker)
+            
+            # Broadcast TF
+            t = tf2_ros.TransformStamped()
+            t.header.stamp = self.get_clock().now().to_msg()
+            t.header.frame_id = 'world'
+            t.child_frame_id = 'brick'
+            t.transform.translation.x = self._brick_pose.pose.position.x
+            t.transform.translation.y = self._brick_pose.pose.position.y
+            t.transform.translation.z = self._brick_pose.pose.position.z
+            t.transform.rotation.x = self._brick_pose.pose.orientation.x
+            t.transform.rotation.y = self._brick_pose.pose.orientation.y
+            t.transform.rotation.z = self._brick_pose.pose.orientation.z
+            t.transform.rotation.w = self._brick_pose.pose.orientation.w
+            self._tf_broadcaster.sendTransform(t)
 
 
 def main(args=None):
