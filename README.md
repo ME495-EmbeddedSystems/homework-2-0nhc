@@ -7,9 +7,10 @@ This package includes an arena node that has a physics engine to simulate a bric
 1. Use `ros2 launch ros2 launch turtle_brick turtle_arena.launch.xml` to start the arena and turtle simulation
 2. Use `ros2 service call /place turtle_brick_interfaces/srv/Place "{x: 6.54445, y: 7.544445, z: 7.0}"` and then `ros2 service call /drop std_srvs/srv/Empty "{}"` to drop a brick
 3. Here is a video of the turtle when the brick is within catching range
-   ${embed video here, it must be playable on github. Upload the video as an issue and link to it}
+
+https://github.com/user-attachments/assets/4f0aa6d5-2be7-4815-86ac-5300942f97a0
+
 
 4. Here is a video of the turtle when the brick cannot be caught
 
-   ${embed video here, it must be playable on github. Upload the video as an issue and link to it}
-```
+https://github.com/user-attachments/assets/f91fed1f-8c7b-4597-ad5e-fbfa28fd324f
