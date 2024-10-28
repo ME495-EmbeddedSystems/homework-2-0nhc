@@ -8,5 +8,13 @@
     <include file="$(find-pkg-share turtle_brick)/launch/run_turtle.launch.xml"/>
 
     <node pkg="turtle_brick" exec="dummy" name="dummy" output="screen"/>
+    <node pkg="turtle_brick" exec="arena" name="arena" output="screen"/>
+
+    <node
+        pkg="tf2_ros"
+        exec="static_transform_publisher"
+        name="static_transform_publisher"
+        output="screen"
+        args="0 0 0 0 0 0 1 world odom" />
 
 </launch>
