@@ -140,7 +140,7 @@ class TurtleRobotNode(Node):
         
         
         # Publish joint states
-        self._wheel_position += self._vx * 1.0/self._timer_frequency
+        self._wheel_position += abs(self._vx) * 1.0/self._timer_frequency
         self._joint_states.header.stamp = self.get_clock().now().to_msg()
         self._joint_states.position = [self._tilt_angle, self._th, self._wheel_position]
         self._joint_states.velocity = [0, 0, 0]
