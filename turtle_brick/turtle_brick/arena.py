@@ -14,6 +14,8 @@ from turtlesim.msg import Pose
 from std_msgs.msg import Float32
 from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
 from std_msgs.msg import ColorRGBA
+from rclpy.qos import QoSDurabilityPolicy, QoSProfile
+
 import math
 import time
 
@@ -68,6 +70,19 @@ class ArenaNode(Node):
         while(self._robot_name[0] == '/'):
             self._robot_name = self._robot_name[1:]
         
+        ############################### Begin_Citation [1] ###############################
+        """
+        We use TRANSIENT_LOCAL durability for the publisher.
+        By setting both publisher and subscriber
+        Durability to TRANSIENT_LOCAL we emulate the effect of 'latched publishers' from ROS 1
+        (See https://github.com/ros2/ros2/issues/464)
+        Essentially this means that when subscribers first connect to the topic they receive the
+        last message published on the topic. Useful for example because rviz might open after
+        the initial markers are published
+        """
+        markerQoS = QoSProfile(depth=10, durability=QoSDurabilityPolicy.TRANSIENT_LOCAL)
+        ############################### End_Citation [1]  ###############################
+        
         # Setup Main Loop Timer
         self._main_loop_timer = self.create_timer(1.0/self._timer_frequency, self._main_loop_timer_callback)
         
@@ -80,13 +95,13 @@ class ArenaNode(Node):
         self._physics_timer = self.create_timer(1.0/self._physics_frequency, self._physics_timer_callback)
         
         # Setup Boundaries Publisher
-        self._boundaries_publisher = self.create_publisher(MarkerArray, '/boundaries', 10)
+        self._boundaries_publisher = self.create_publisher(MarkerArray, '/boundaries', markerQoS)
         self._boundaries = MarkerArray()
         self._boundaries.markers = []
         self._init_boundaries(self._num_markers_per_side, self._boundary_width, self._arena_width, self._arena_height)
         
         # Setup Brick Publisher
-        self._brick_publisher = self.create_publisher(Marker, '/brick', 10)
+        self._brick_publisher = self.create_publisher(Marker, '/brick', markerQoS)
         self._brick_pose = PoseStamped()
         self._brick_marker = self._generate_marker(4*self._num_markers_per_side, 
                                                    self._brick_pose.pose.position.x, 

@@ -2,6 +2,7 @@
 * Rviz launch order
 * Collision and friction effects
 * Description in setup.py and package.xml
+* test_brick_launch.py
 
 
 # ME495 Embedded Systems Homework 2
