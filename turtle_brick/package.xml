@@ -17,6 +17,7 @@
   <depend>joint_state_publisher_gui</depend>
   <depend>tf_transformations</depend>
   <depend>std_srvs</depend>
+  <depend>pytest</depend>
 
   <export>
     <build_type>ament_python</build_type>

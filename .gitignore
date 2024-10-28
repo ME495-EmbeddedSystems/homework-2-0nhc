@@ -1,2 +1,4 @@
 .vscode
 turtle_brick/turtle_brick/__pycache__
+turtle_brick/test/__pycache__
+turtle_brick_interfaces/test/__pycache__
