@@ -16,6 +16,7 @@ class World:
         self._radius = radius
         self._dt = dt
         
+        self._zdot = 0
         self._t = 0
         
 
@@ -39,14 +40,19 @@ class World:
            location - the (x,y,z) location of the brick
         """
         self._brick = location
-        self._t = 0
+        self._zdot = 0.0
+        self._t = 0.0
 
 
     def drop(self):
         """
         Update the brick's location by having it fall in gravity for one timestep
         """
-        self._brick[2] = self._gravity * self._t**2 / 2
+        self._brick[2] += self._zdot * self._dt
+        self._zdot += self._gravity * self._dt
+        if(self._brick[2] < 0.0):
+            self._brick[2] = 0.0
+            self._zdot = 0.0
         self._t += self._dt
         
         return self._brick

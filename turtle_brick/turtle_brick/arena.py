@@ -5,9 +5,10 @@ from geometry_msgs.msg import Point, PoseStamped
 import tf_transformations
 import numpy as np
 import tf2_ros
-from turtle_brick.states import INIT, PLACED
+from turtle_brick.states import INIT, PLACED, DROPPING
 from turtle_brick.physics import World
 from turtle_brick_interfaces.srv import Place
+from std_srvs.srv import Empty 
 
 
 class ArenaNode(Node):
@@ -51,6 +52,9 @@ class ArenaNode(Node):
         # Setup /place Service
         self._place_service = self.create_service(Place, '/place', self._place_callback)
         
+        # Setup /drop Service
+        self._drop_service = self.create_service(Empty, '/drop', self._drop_callback)
+        
         # Setup TF Broadcaster
         self._tf_broadcaster = tf2_ros.TransformBroadcaster(self)
         
@@ -64,6 +68,12 @@ class ArenaNode(Node):
                              self._brick_pose.pose.position.y,
                              self._brick_pose.pose.position.z], 
                             gravity, radius, 1.0/frequency)
+    
+    
+    def _drop_callback(self, request, response):
+        if(self._state == PLACED):
+            self._state = DROPPING
+        return response
     
     
     def _place_callback(self, request, response):
@@ -186,6 +196,9 @@ class ArenaNode(Node):
             t.transform.rotation.z = self._brick_pose.pose.orientation.z
             t.transform.rotation.w = self._brick_pose.pose.orientation.w
             self._tf_broadcaster.sendTransform(t)
+            
+            if(self._state == DROPPING):
+                self._physics._brick = self._physics.drop()
 
 
 def main(args=None):
