@@ -7,6 +7,8 @@ from turtle_brick.states import INIT, PLACED, DROPPING, DROPPED, FALLING, CATCHI
 from turtlesim.msg import Pose
 from visualization_msgs.msg import MarkerArray, Marker
 import numpy as np
+from visualization_msgs.msg import MarkerArray, Marker
+from std_msgs.msg import ColorRGBA
 
 
 class CatcherNode(Node):
@@ -28,6 +30,9 @@ class CatcherNode(Node):
         # Declare gravity acceleration parameter, default to -9.81
         self.declare_parameter('gravity', -9.81)
         self._gravity = self.get_parameter("gravity").get_parameter_value().double_value
+        # Declare number of markers per side parameter, default to 20
+        self.declare_parameter('num_markers_per_side', 50)
+        self._num_markers_per_side = self.get_parameter("num_markers_per_side").get_parameter_value().integer_value
         # Declare robot name, default to turtle1
         self.declare_parameter('robot_name', 'turtle1')
         self._robot_name = self.get_parameter("robot_name").get_parameter_value().string_value
@@ -45,6 +50,29 @@ class CatcherNode(Node):
         # Setup goal_pose Publisher
         self._goal_pose_publisher = self.create_publisher(PoseStamped, '/goal_pose', 10)
         self._goal_pose = PoseStamped()
+        
+        # Setup words marker Publisher
+        self._words_publisher = self.create_publisher(Marker, '/words', 10)
+        self._words = Marker()
+        self._words.header.frame_id = 'odom'
+        self._words.ns = 'catcher'
+        self._words.id = 4*self._num_markers_per_side+1
+        self._words.type = Marker.TEXT_VIEW_FACING
+        self._words.action = Marker.ADD
+        self._words.pose.position.x = 5.544445
+        self._words.pose.position.y = 5.544445
+        self._words.pose.position.z = 1.5
+        self._words.pose.orientation.x = 0.0
+        self._words.pose.orientation.y = 0.0
+        self._words.pose.orientation.z = 0.0
+        self._words.pose.orientation.w = 1.0
+        self._words.text = "Unreachable"
+        self._words.scale.z = 1.5  # Height of the text in meters
+        self._words.color = ColorRGBA(r=1.0, g=0.0, b=0.0, a=1.0)  # Red color, fully opaque
+        self._words.lifetime.sec = 3
+        self._words.lifetime.nanosec = 0
+        
+        
         
         # Setup subscriber for arena's state
         self._arena_state_subscriber = self.create_subscription(Float32, '/arena_state', self._arena_state_callback, 10)
@@ -104,6 +132,10 @@ class CatcherNode(Node):
             self._goal_pose.pose.position.x = self._brick_pose.position.x
             self._goal_pose.pose.position.y = self._brick_pose.position.y
             self._goal_pose_publisher.publish(self._goal_pose)
+            
+        elif(self._state == NONAVAILABLE):
+            self._words_publisher.publish(self._words)
+            self._state = INIT
             
         # self._tilt_publisher.publish(self._tilt_msg)
 

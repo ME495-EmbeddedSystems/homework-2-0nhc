@@ -300,7 +300,7 @@ class ArenaNode(Node):
                 # Brick is outside the platform
                 self._physics_z_limit = 0.0
                 
-            self._physics._brick = self._physics.drop(self._physics_z_limit)
+            self._physics._brick = self._physics.drop(z_limit = self._physics_z_limit)
             if(self._physics._brick[2] == self._physics_z_limit):
                 self._x_offset = self._physics.brick[0] - self._turtle_pose.x
                 self._y_offset = self._physics.brick[1] - self._turtle_pose.y
@@ -308,7 +308,7 @@ class ArenaNode(Node):
         
         elif(self._state == DROPPED):
             # Move brick with the turtle
-            self._physics.brick = [self._turtle_pose.x + self._x_offset, self._turtle_pose.y + self._y_offset, self._platform_height + self._brick_size_z/2]
+            self._physics.brick = [self._turtle_pose.x + self._x_offset, self._turtle_pose.y + self._y_offset, self._physics_z_limit]
         
         elif(self._state == FALLING):            
             dx = self._brick_pose.pose.position.x - self._turtle_pose.x

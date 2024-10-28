@@ -108,8 +108,6 @@ Visualization Manager:
           Value: false
         base_link:
           Value: true
-        brick:
-          Value: true
         odom:
           Value: true
         platform:
@@ -129,8 +127,6 @@ Visualization Manager:
       Show Names: true
       Tree:
         world:
-          brick:
-            {}
           odom:
             base_link:
               base_footprint:
@@ -159,7 +155,7 @@ Visualization Manager:
       Enabled: true
       Name: Marker
       Namespaces:
-        boundary: true
+        {}
       Topic:
         Depth: 5
         Durability Policy: Volatile
@@ -167,6 +163,19 @@ Visualization Manager:
         History Policy: Keep Last
         Reliability Policy: Reliable
         Value: /brick
+      Value: true
+    - Class: rviz_default_plugins/Marker
+      Enabled: true
+      Name: Marker
+      Namespaces:
+        {}
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /words
       Value: true
   Enabled: true
   Global Options:
@@ -214,7 +223,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 13.325982093811035
+      Distance: 20.968690872192383
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
