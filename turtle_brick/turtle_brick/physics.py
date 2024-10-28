@@ -20,8 +20,10 @@ class World:
         self._dt = dt
         
         self._xdot = 0.0
+        self._ydot = 0.0
         self._zdot = 0.0
         self._t = 0.0
+        self._friction_coefficient = 0.9
         
 
     @property
@@ -53,15 +55,20 @@ class World:
         """
         Update the brick's location by having it fall in gravity for one timestep
         """
-        self._brick[0] += self._xdot * self._dt
-        self._brick[2] += self._zdot * self._dt
-        
-        self._xdot += self._gravity * self._dt * (-np.tan(pitch))
-        self._zdot += self._gravity * self._dt
+        if(self._brick[2] <= z_limit):
+            self._brick[0] += self._xdot * self._dt
+            self._brick[2] = z_limit
+            self._xdot = self._xdot * self._friction_coefficient
+            self._zdot = 0.0
+        else:
+            self._brick[0] += self._xdot * self._dt
+            self._brick[2] += self._zdot * self._dt
+            
+            self._xdot += self._gravity * self._dt * (-np.tan(pitch))
+            self._zdot += self._gravity * self._dt
         
         if(self._brick[2] < z_limit):
             self._brick[2] = z_limit
-            self._zdot = 0.0
+
         self._t += self._dt
-        
         return self._brick

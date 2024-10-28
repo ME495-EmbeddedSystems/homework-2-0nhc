@@ -1,6 +1,6 @@
 import pytest
 
-def test_dummy():
+def test_interfaces():
     try:
         from turtle_brick_interfaces.msg import Tilt
         from turtle_brick_interfaces.srv import Place
