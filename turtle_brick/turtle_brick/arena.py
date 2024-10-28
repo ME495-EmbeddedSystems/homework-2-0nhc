@@ -64,7 +64,7 @@ class ArenaNode(Node):
         self._main_loop_timer = self.create_timer(1.0/self._timer_frequency, self._main_loop_timer_callback)
         
         # Setup Physics Timer
-        self._physics_timer = self.create_timer(1.0/self._timer_frequency, self._physics_timer_callback)
+        self._physics_timer = self.create_timer(1.0/self._physics_frequency, self._physics_timer_callback)
         
         # Setup Boundaries Publisher
         self._boundaries_publisher = self.create_publisher(MarkerArray, '/boundaries', 10)
