@@ -44,13 +44,13 @@ class ArenaNode(Node):
         self.declare_parameter('arena_height', 0.8)
         self._arena_height = self.get_parameter("arena_height").get_parameter_value().double_value
         # Declare brick size x parameter, default to 0.2
-        self.declare_parameter('brick_size_x', 0.2)
+        self.declare_parameter('brick_size_x', 0.5)
         self._brick_size_x = self.get_parameter("brick_size_x").get_parameter_value().double_value
         # Declare brick size y parameter, default to 0.15
-        self.declare_parameter('brick_size_y', 0.15)
+        self.declare_parameter('brick_size_y', 0.3)
         self._brick_size_y = self.get_parameter("brick_size_y").get_parameter_value().double_value
         # Declare brick size z parameter, default to 0.075
-        self.declare_parameter('brick_size_z', 0.075)
+        self.declare_parameter('brick_size_z', 0.2)
         self._brick_size_z = self.get_parameter("brick_size_z").get_parameter_value().double_value
         # Declare gravity acceleration parameter, default to -9.81
         self.declare_parameter('gravity', -9.81)
