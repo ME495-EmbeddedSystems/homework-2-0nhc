@@ -8,9 +8,7 @@ This package includes an arena node that has a physics engine to simulate a bric
 2. Use `ros2 service call /place turtle_brick_interfaces/srv/Place "{x: 6.54445, y: 7.544445, z: 7.0}"` and then `ros2 service call /drop std_srvs/srv/Empty "{}"` to drop a brick
 3. Here is a video of the turtle when the brick is within catching range
 
-
-https://github.com/user-attachments/assets/4f0aa6d5-2be7-4815-86ac-5300942f97a0
-
+https://github.com/user-attachments/assets/45013c58-6f4f-4dd4-b45e-b23ccf49f3d4
 
 4. Here is a video of the turtle when the brick cannot be caught
 
