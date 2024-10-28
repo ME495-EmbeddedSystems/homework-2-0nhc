@@ -5,8 +5,9 @@ from geometry_msgs.msg import Point, PoseStamped
 import tf_transformations
 import numpy as np
 import tf2_ros
-from turtle_brick.states import INIT
+from turtle_brick.states import INIT, PLACED
 from turtle_brick.physics import World
+from turtle_brick_interfaces.srv import Place
 
 
 class ArenaNode(Node):
@@ -47,6 +48,9 @@ class ArenaNode(Node):
                                                    brick_size_z,
                                                    r=1.0, g=0.0, b=0.0, a=1.0)
         
+        # Setup /place Service
+        self._place_service = self.create_service(Place, '/place', self._place_callback)
+        
         # Setup TF Broadcaster
         self._tf_broadcaster = tf2_ros.TransformBroadcaster(self)
         
@@ -60,6 +64,14 @@ class ArenaNode(Node):
                              self._brick_pose.pose.position.y,
                              self._brick_pose.pose.position.z], 
                             gravity, radius, 1.0/frequency)
+    
+    
+    def _place_callback(self, request, response):
+        new_position = [request.x, request.y, request.z]
+        self._physics.brick = new_position
+        response.success = True
+        self._state = PLACED
+        return response
     
     
     def _init_boundaries(self, num_markers_per_side, boundary_width, arena_width, arena_height):
@@ -149,7 +161,7 @@ class ArenaNode(Node):
         # Publish boundaries
         self._boundaries_publisher.publish(self._boundaries)
         
-        # Update brick pose
+        # Update brick pose based on physics
         self._brick_pose.pose.position.x = self._physics.brick[0]
         self._brick_pose.pose.position.y = self._physics.brick[1]
         self._brick_pose.pose.position.z = self._physics.brick[2]
