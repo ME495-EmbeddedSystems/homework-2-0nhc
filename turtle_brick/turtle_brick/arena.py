@@ -1,9 +1,10 @@
 import rclpy
 from rclpy.node import Node
 from visualization_msgs.msg import MarkerArray, Marker
-from geometry_msgs.msg import Point
+from geometry_msgs.msg import Point, PoseStamped
 import tf_transformations
 import numpy as np
+import tf2_ros
 
 
 class ArenaNode(Node):
@@ -14,20 +15,41 @@ class ArenaNode(Node):
         # Setup Main Loop Timer
         self._timer = self.create_timer(0.01, self._timer_callback)
         
-        # Setup Markers Publisher
-        self._markers_publisher = self.create_publisher(MarkerArray, '/boundaries', 10)
+        # Setup Boundaries Publisher
+        self._boundaries_publisher = self.create_publisher(MarkerArray, '/boundaries', 10)
         self._boundaries = MarkerArray()
         self._boundaries.markers = []
-        
-        # number of markers in one side of the arena
         num_markers_per_side = 50
         boundary_width = float(0.3)
         arena_width = 12
         arena_height = 0.8
-        self._init_markers(num_markers_per_side, boundary_width, arena_width, arena_height)
+        self._init_boundaries(num_markers_per_side, boundary_width, arena_width, arena_height)
+        
+        # Setup Brick Publisher
+        self._brick_publisher = self.create_publisher(Marker, '/brick', 10)
+        brick_size_x = 0.2
+        brick_size_y = 0.15
+        brick_size_z = 0.075
+        self._brick_pose = PoseStamped()
+        self._brick_marker = self._generate_marker(4*num_markers_per_side, 
+                                                   self._brick_pose.pose.position.x, 
+                                                   self._brick_pose.pose.position.y, 
+                                                   self._brick_pose.pose.position.z, 
+                                                   self._brick_pose.pose.orientation.x,
+                                                   self._brick_pose.pose.orientation.y,
+                                                   self._brick_pose.pose.orientation.z,
+                                                   self._brick_pose.pose.orientation.w,
+                                                   brick_size_x, 
+                                                   brick_size_y, 
+                                                   brick_size_z,
+                                                   r=1.0, g=0.0, b=0.0, a=1.0)
+        
+        # Setup TF Broadcaster
+        self._tf_broadcaster = tf2_ros.TransformBroadcaster(self)
     
-    def _init_markers(self, num_markers_per_side, boundary_width, arena_width, arena_height):
-        # side 1
+    
+    def _init_boundaries(self, num_markers_per_side, boundary_width, arena_width, arena_height):
+        # Side 1
         for i in range(0, num_markers_per_side):
             x=-0.5-boundary_width/2
             y=(arena_width+boundary_width*2)/num_markers_per_side*(i+0.5)-0.5-boundary_width
@@ -35,12 +57,14 @@ class ArenaNode(Node):
             R = 0
             P = 0
             Y = np.pi/2
+            q = tf_transformations.quaternion_from_euler(R, P, Y)
             scale_x = (arena_width+boundary_width*2)/num_markers_per_side
             scale_y = boundary_width
             scale_z = arena_height
-            marker = self._generate_marker(i, x, y, z, R, P, Y, scale_x, scale_y, scale_z)
+            marker = self._generate_marker(i, x, y, z, q[0], q[1], q[2], q[3], scale_x, scale_y, scale_z)
             self._boundaries.markers.append(marker)
-        # side 2
+            
+        # Side 2
         for i in range(num_markers_per_side, 2*num_markers_per_side):
             x=arena_width/num_markers_per_side*(i-num_markers_per_side+0.5)-0.5
             y=arena_width-0.5+boundary_width/2
@@ -51,9 +75,10 @@ class ArenaNode(Node):
             scale_x = arena_width/num_markers_per_side
             scale_y = boundary_width
             scale_z = arena_height
-            marker = self._generate_marker(i, x, y, z, R, P, Y, scale_x, scale_y, scale_z)
+            marker = self._generate_marker(i, x, y, z, q[0], q[1], q[2], q[3], scale_x, scale_y, scale_z)
             self._boundaries.markers.append(marker)
-        # side 3
+            
+        # Side 3
         for i in range(2*num_markers_per_side, 3*num_markers_per_side):
             x=arena_width-0.5+boundary_width/2
             y=(arena_width+boundary_width*2)/num_markers_per_side*(-2*num_markers_per_side+i+0.5)-0.5-boundary_width
@@ -64,9 +89,10 @@ class ArenaNode(Node):
             scale_x = (arena_width+boundary_width*2)/num_markers_per_side
             scale_y = boundary_width
             scale_z = arena_height
-            marker = self._generate_marker(i, x, y, z, R, P, Y, scale_x, scale_y, scale_z)
+            marker = self._generate_marker(i, x, y, z, q[0], q[1], q[2], q[3], scale_x, scale_y, scale_z)
             self._boundaries.markers.append(marker)
-        # side 4
+            
+        # Side 4
         for i in range(3*num_markers_per_side, 4*num_markers_per_side):
             x=arena_width/num_markers_per_side*(-3*num_markers_per_side+i+0.5)-0.5
             y=-0.5-boundary_width/2
@@ -77,11 +103,11 @@ class ArenaNode(Node):
             scale_x = arena_width/num_markers_per_side
             scale_y = boundary_width
             scale_z = arena_height
-            marker = self._generate_marker(i, x, y, z, R, P, Y, scale_x, scale_y, scale_z)
+            marker = self._generate_marker(i, x, y, z, q[0], q[1], q[2], q[3], scale_x, scale_y, scale_z)
             self._boundaries.markers.append(marker)
         
         
-    def _generate_marker(self, id, x, y, z, R, P, Y, scale_x, scale_y, scale_z):
+    def _generate_marker(self, id, x, y, z, qx, qy, qz, qw, scale_x, scale_y, scale_z, r=0.0, g=0.0, b=1.0, a=1.0):
         marker = Marker()
         marker.header.frame_id = "world"
         marker.header.stamp = self.get_clock().now().to_msg()
@@ -90,24 +116,41 @@ class ArenaNode(Node):
         marker.type = Marker.CUBE
         marker.action = Marker.ADD
         marker.pose.position = Point(x=x, y=y, z=z)
-        q = tf_transformations.quaternion_from_euler(R, P, Y)
-        marker.pose.orientation.x = q[0]
-        marker.pose.orientation.y = q[1]
-        marker.pose.orientation.z = q[2]
-        marker.pose.orientation.w = q[3]
+        marker.pose.orientation.x = qx
+        marker.pose.orientation.y = qy
+        marker.pose.orientation.z = qz
+        marker.pose.orientation.w = qw
         marker.scale.x = scale_x
         marker.scale.y = scale_y
         marker.scale.z = scale_z
-        marker.color.r = 0.0
-        marker.color.g = 0.0
-        marker.color.b = 1.0
-        marker.color.a = 1.0
+        marker.color.r = r
+        marker.color.g = g
+        marker.color.b = b
+        marker.color.a = a
 
         return marker
         
         
     def _timer_callback(self):
-        self._markers_publisher.publish(self._boundaries)
+        # Publish boundaries
+        self._boundaries_publisher.publish(self._boundaries)
+        
+        # Publish brick
+        self._brick_publisher.publish(self._brick_marker)
+        
+        # Broadcast TF
+        t = tf2_ros.TransformStamped()
+        t.header.stamp = self.get_clock().now().to_msg()
+        t.header.frame_id = 'world'
+        t.child_frame_id = 'brick'
+        t.transform.translation.x = self._brick_pose.pose.position.x
+        t.transform.translation.y = self._brick_pose.pose.position.y
+        t.transform.translation.z = self._brick_pose.pose.position.z
+        t.transform.rotation.x = self._brick_pose.pose.orientation.x
+        t.transform.rotation.y = self._brick_pose.pose.orientation.y
+        t.transform.rotation.z = self._brick_pose.pose.orientation.z
+        t.transform.rotation.w = self._brick_pose.pose.orientation.w
+        self._tf_broadcaster.sendTransform(t)
 
 
 def main(args=None):

@@ -5,6 +5,7 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Global Options1
+        - /TF1
         - /TF1/Frames1
       Splitter Ratio: 0.5
     Tree Height: 610
@@ -105,9 +106,11 @@ Visualization Manager:
       Frames:
         All Enabled: false
         base_footprint:
-          Value: true
-        base_link:
           Value: false
+        base_link:
+          Value: true
+        brick:
+          Value: true
         odom:
           Value: true
         platform:
@@ -119,14 +122,16 @@ Visualization Manager:
         wheel:
           Value: false
         world:
-          Value: true
-      Marker Scale: 1
+          Value: false
+      Marker Scale: 5
       Name: TF
       Show Arrows: true
       Show Axes: true
       Show Names: true
       Tree:
         world:
+          brick:
+            {}
           odom:
             base_link:
               base_footprint:
@@ -150,6 +155,19 @@ Visualization Manager:
         History Policy: Keep Last
         Reliability Policy: Reliable
         Value: /boundaries
+      Value: true
+    - Class: rviz_default_plugins/Marker
+      Enabled: true
+      Name: Marker
+      Namespaces:
+        boundary: true
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /brick
       Value: true
   Enabled: true
   Global Options:
@@ -197,7 +215,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 34.306827545166016
+      Distance: 44.32332229614258
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -212,10 +230,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.570398211479187
+      Pitch: 0.690398097038269
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 0.00041484832763671875
+      Yaw: 6.218606948852539
     Saved: ~
 Window Geometry:
   Displays:
