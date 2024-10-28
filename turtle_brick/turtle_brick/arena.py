@@ -13,6 +13,10 @@ from std_srvs.srv import Empty
 from turtlesim.msg import Pose
 from std_msgs.msg import Float32
 from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
+from std_msgs.msg import ColorRGBA
+import math
+import time
+
 
 class ArenaNode(Node):
 
@@ -21,6 +25,9 @@ class ArenaNode(Node):
         # Declare timer frequency parameter, default to 100 Hz
         self.declare_parameter('frequency', 100.0)
         self._timer_frequency = self.get_parameter("frequency").get_parameter_value().double_value
+        # Declare rainbow frequency parameter, default to 60 Hz
+        self.declare_parameter('rainbow_frequency', 60.0)
+        self._rainbow_frequency = self.get_parameter("rainbow_frequency").get_parameter_value().double_value
         # Declare physics frequency parameter, default to 250 Hz
         self.declare_parameter('physics_frequency', 250.0)
         self._physics_frequency = self.get_parameter("physics_frequency").get_parameter_value().double_value
@@ -53,9 +60,7 @@ class ArenaNode(Node):
         self._platform_height = self.get_parameter("platform_height").get_parameter_value().double_value
         self.declare_parameter('platform_cylinder_radius', 0.1)
         self._platform_cylinder_radius = self.get_parameter("platform_cylinder_radius").get_parameter_value().double_value
-        # Declare goal tolerance parameter, default to 0.01
-        self.declare_parameter('tolerance', 0.01)
-        self._tolerance = self.get_parameter("tolerance").get_parameter_value().double_value
+        self._tolerance = self._platform_cylinder_radius/2
         # Declare robot name, default to turtle1
         self.declare_parameter('robot_name', 'turtle1')
         self._robot_name = self.get_parameter("robot_name").get_parameter_value().string_value
@@ -65,6 +70,11 @@ class ArenaNode(Node):
         
         # Setup Main Loop Timer
         self._main_loop_timer = self.create_timer(1.0/self._timer_frequency, self._main_loop_timer_callback)
+        
+        # Setup Rainbow Timer
+        self._rainbow_timer = self.create_timer(1.0/self._rainbow_frequency, self._rainbow_timer_callback)
+        self._start_time = time.time()
+        self._num_markers_in_boundaries = 4*self._num_markers_per_side
         
         # Setup Physics Timer
         self._physics_timer = self.create_timer(1.0/self._physics_frequency, self._physics_timer_callback)
@@ -180,6 +190,7 @@ class ArenaNode(Node):
             R = 0
             P = 0
             Y = 0
+            q = tf_transformations.quaternion_from_euler(R, P, Y)
             scale_x = arena_width/num_markers_per_side
             scale_y = boundary_width
             scale_z = arena_height
@@ -189,11 +200,12 @@ class ArenaNode(Node):
         # Side 3
         for i in range(2*num_markers_per_side, 3*num_markers_per_side):
             x=arena_width-0.5+boundary_width/2
-            y=(arena_width+boundary_width*2)/num_markers_per_side*(-2*num_markers_per_side+i+0.5)-0.5-boundary_width
+            y=(arena_width+boundary_width*2)/num_markers_per_side*(3*num_markers_per_side-i-0.5)-0.5-boundary_width
             z=arena_height/2
             R = 0
             P = 0
             Y = np.pi/2
+            q = tf_transformations.quaternion_from_euler(R, P, Y)
             scale_x = (arena_width+boundary_width*2)/num_markers_per_side
             scale_y = boundary_width
             scale_z = arena_height
@@ -202,12 +214,13 @@ class ArenaNode(Node):
             
         # Side 4
         for i in range(3*num_markers_per_side, 4*num_markers_per_side):
-            x=arena_width/num_markers_per_side*(-3*num_markers_per_side+i+0.5)-0.5
+            x=arena_width/num_markers_per_side*(4*num_markers_per_side-i-0.5)-0.5
             y=-0.5-boundary_width/2
             z=arena_height/2
             R = 0
             P = 0
             Y = 0
+            q = tf_transformations.quaternion_from_euler(R, P, Y)
             scale_x = arena_width/num_markers_per_side
             scale_y = boundary_width
             scale_z = arena_height
@@ -296,7 +309,7 @@ class ArenaNode(Node):
             # Check if brick is inside the platform
             distance = np.sqrt((self._brick_pose.pose.position.x - self._turtle_pose.x)**2+
                                 (self._brick_pose.pose.position.y - self._turtle_pose.y)**2)
-            if distance < self._platform_cylinder_radius:
+            if distance < self._tolerance:
                 # Brick is inside the platform
                 self._physics_z_limit = self._platform_height + self._brick_size_z/2
             else:
@@ -318,7 +331,21 @@ class ArenaNode(Node):
             self._physics_z_limit = self._platform_height + self._brick_size_z/2 - dx*np.tan(self._tilt_angle)
             self._physics_pitch = self._tilt_angle
             self._physics._brick = self._physics.drop(z_limit=self._physics_z_limit, pitch=self._physics_pitch)
-            
+    
+    
+    def _rainbow_timer_callback(self):
+        elapsed_time = time.time() - self._start_time
+        for idx in range(self._num_markers_in_boundaries):
+            color = self.get_rainbow_color(idx / self._num_markers_in_boundaries + elapsed_time)
+            self._boundaries.markers[idx].color = color
+    
+    
+    def get_rainbow_color(self, position):
+        r = max(0.0, math.sin(position * 2 * math.pi + 0) * 0.5 + 0.5)
+        g = max(0.0, math.sin(position * 2 * math.pi + 2 * math.pi / 3) * 0.5 + 0.5)
+        b = max(0.0, math.sin(position * 2 * math.pi + 4 * math.pi / 3) * 0.5 + 0.5)
+        return ColorRGBA(r=r, g=g, b=b, a=1.0)
+    
 
 def main(args=None):
     rclpy.init(args=args)

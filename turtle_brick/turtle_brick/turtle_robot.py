@@ -22,19 +22,12 @@ class TurtleRobotNode(Node):
         # Declare timer frequency parameter, default to 100 Hz
         self.declare_parameter('frequency', 100.0)
         self._timer_frequency = self.get_parameter("frequency").get_parameter_value().double_value
-        
-        # Declare goal tolerance parameter, default to 0.1
-        self.declare_parameter('tolerance', 0.1)
-        self._tolerance = self.get_parameter("tolerance").get_parameter_value().double_value
-
         # Declare goal max_velocity parameter, default to 3.0
         self.declare_parameter('max_velocity', 3.0)
         self._max_velocity = self.get_parameter("max_velocity").get_parameter_value().double_value
-        
         # Declare goal kp parameter, default to 0.1
         self.declare_parameter('kp', 0.1)
         self._kp = self.get_parameter("kp").get_parameter_value().double_value
-        
         # Declare robot urdf parameter, default to 0.1
         self.declare_parameter('base_link_length', 0.1)
         self._base_link_length = self.get_parameter("base_link_length").get_parameter_value().double_value
@@ -43,7 +36,9 @@ class TurtleRobotNode(Node):
         self.declare_parameter('wheel_radius', 0.1)
         self._wheel_radius = self.get_parameter("wheel_radius").get_parameter_value().double_value
         self._base_to_footprint_z = self._stem_height + self._wheel_radius*2 + self._base_link_length/2
-
+        self.declare_parameter('platform_cylinder_radius', 0.1)
+        self._platform_cylinder_radius = self.get_parameter("platform_cylinder_radius").get_parameter_value().double_value
+        self._tolerance = self._platform_cylinder_radius/2
         # Declare robot name, default to turtle1
         self.declare_parameter('robot_name', 'turtle1')
         self._robot_name = self.get_parameter("robot_name").get_parameter_value().string_value
@@ -119,6 +114,7 @@ class TurtleRobotNode(Node):
         if(self._state == MOVING):
             p1 = [self._turtle_pose.x, self._turtle_pose.y]
             p2 = [self._goal_pose.pose.position.x, self._goal_pose.pose.position.y]
+            # if(self._euclidean_distance(p1, p2) < self._tolerance):
             if(self._euclidean_distance(p1, p2) < self._tolerance):
                 self._vx, self._vy = 0.0, 0.0
                 self._turtle_cmd = Twist()
@@ -155,8 +151,7 @@ class TurtleRobotNode(Node):
     def _goal_pose_callback(self, msg):
         if(self._state == STOPPED):
             self._state = MOVING
-        elif(self._state == MOVING):
-            self._goal_pose = msg
+        self._goal_pose = msg
         
         
     def _turtle_pose_callback(self, msg):

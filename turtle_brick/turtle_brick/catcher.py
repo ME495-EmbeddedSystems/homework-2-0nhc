@@ -33,9 +33,10 @@ class CatcherNode(Node):
         # Declare number of markers per side parameter, default to 20
         self.declare_parameter('num_markers_per_side', 50)
         self._num_markers_per_side = self.get_parameter("num_markers_per_side").get_parameter_value().integer_value
-        # Declare goal tolerance parameter, default to 0.1
-        self.declare_parameter('tolerance', 0.1)
-        self._tolerance = self.get_parameter("tolerance").get_parameter_value().double_value
+        # Declare platform cylinder radius parameter, default to 0.1
+        self.declare_parameter('platform_cylinder_radius', 0.1)
+        self._platform_cylinder_radius = self.get_parameter("platform_cylinder_radius").get_parameter_value().double_value
+        self._tolerance = self._platform_cylinder_radius/2
         # Declare robot name, default to turtle1
         self.declare_parameter('robot_name', 'turtle1')
         self._robot_name = self.get_parameter("robot_name").get_parameter_value().string_value
