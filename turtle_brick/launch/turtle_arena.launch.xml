@@ -1,13 +1,10 @@
 <launch>
-    <!-- Temporary for debugging -->
-
     <include file="$(find-pkg-share turtle_brick)/launch/show_turtle.launch.xml">
         <arg name="use_jsp" value="none"/>
     </include>
 
     <include file="$(find-pkg-share turtle_brick)/launch/run_turtle.launch.xml"/>
 
-    <!-- <node pkg="turtle_brick" exec="debug_goal_pose" name="debug_goal_pose" output="screen"/> -->
     <node pkg="turtle_brick" exec="arena" name="arena" output="screen">
         <param from="$(find-pkg-share turtle_brick)/config/turtle.yaml"/>
     </node>
@@ -22,5 +19,4 @@
         name="static_transform_publisher"
         output="screen"
         args="0 0 0 0 0 0 1 world odom" />
-
 </launch>

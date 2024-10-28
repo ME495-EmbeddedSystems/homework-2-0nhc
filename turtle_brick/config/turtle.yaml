@@ -7,7 +7,7 @@
     # kp for holonomic control
     kp: 0.1
     # The maximum angular velocity of the robot
-    tolerance: 0.03
+    tolerance: 0.04
     # The name of the robot
     robot_name: 'turtle1'
 

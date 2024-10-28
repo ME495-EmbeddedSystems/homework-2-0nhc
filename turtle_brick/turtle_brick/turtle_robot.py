@@ -114,26 +114,34 @@ class TurtleRobotNode(Node):
         t.transform.rotation.w = q[3]
         self._tf_broadcaster.sendTransform(t)
         
-        # Publish control commands
+        
+        # Check if goal is reached
         if(self._state == MOVING):
-            # Use planner to calc control commands
-            current_state = [self._turtle_pose.x, self._turtle_pose.y, self._turtle_pose.theta]
-            goal_pose = [self._goal_pose.pose.position.x, self._goal_pose.pose.position.y]
-            self._vx, self._vy, self._th = self._controller.holonomic_control(current_state, goal_pose)
-            self._turtle_cmd.linear.x = self._vx
-            self._turtle_cmd.linear.y = self._vy
+            p1 = [self._turtle_pose.x, self._turtle_pose.y]
+            p2 = [self._goal_pose.pose.position.x, self._goal_pose.pose.position.y]
+            if(self._euclidean_distance(p1, p2) < self._tolerance):
+                self._vx, self._vy = 0.0, 0.0
+                self._turtle_cmd = Twist()
+                self._turtle_cmd_publisher.publish(self._turtle_cmd)
+                self._state = STOPPED
+            else:
+                # Use planner to calc control commands
+                current_state = [self._turtle_pose.x, self._turtle_pose.y, self._turtle_pose.theta]
+                goal_pose = [self._goal_pose.pose.position.x, self._goal_pose.pose.position.y]
+                self._vx, self._vy, self._th = self._controller.holonomic_control(current_state, goal_pose)
+                self._turtle_cmd.linear.x = self._vx
+                self._turtle_cmd.linear.y = self._vy
+                self._turtle_cmd_publisher.publish(self._turtle_cmd)
             
         elif(self._state == STOPPED):
-            self._turtle_cmd = Twist()
-        
-        elif(self._state == REACHED):
-            self._vx, self._vy = 0.0, 0.0
             self._turtle_cmd = Twist()
             
         else:
             self.get_logger().warn("Unknown state: "+str(self._state))
-            
+        
         self._turtle_cmd_publisher.publish(self._turtle_cmd)
+            
+        
         
         # Publish joint states
         self._wheel_position += self._vx * 1.0/self._timer_frequency
@@ -142,14 +150,6 @@ class TurtleRobotNode(Node):
         self._joint_states.velocity = [0, 0, 0]
         self._joint_states.effort = [0, 0, 0]
         self._joint_states_publisher.publish(self._joint_states)
-        
-        # Check if goal is reached
-        if(self._state == MOVING):
-            p1 = [self._turtle_pose.x, self._turtle_pose.y]
-            p2 = [self._goal_pose.pose.position.x, self._goal_pose.pose.position.y]
-            if(self._euclidean_distance(p1, p2) < self._tolerance):
-                self._state = REACHED
-                self.get_logger().info("Goal reached")
     
     
     def _goal_pose_callback(self, msg):

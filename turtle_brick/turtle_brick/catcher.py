@@ -3,7 +3,7 @@ from rclpy.node import Node
 from geometry_msgs.msg import PoseStamped
 from turtle_brick_interfaces.msg import Tilt
 from std_msgs.msg import Float32
-from turtle_brick.states import INIT, PLACED, DROPPING, DROPPED, FALLING, CATCHING, NONAVAILABLE, CATCHED
+from turtle_brick.states import INIT, PLACED, DROPPING, DROPPED, FALLING, CATCHING, NONAVAILABLE, CATCHED, CLEARING
 from turtlesim.msg import Pose
 from visualization_msgs.msg import MarkerArray, Marker
 import numpy as np
@@ -33,6 +33,9 @@ class CatcherNode(Node):
         # Declare number of markers per side parameter, default to 20
         self.declare_parameter('num_markers_per_side', 50)
         self._num_markers_per_side = self.get_parameter("num_markers_per_side").get_parameter_value().integer_value
+        # Declare goal tolerance parameter, default to 0.1
+        self.declare_parameter('tolerance', 0.1)
+        self._tolerance = self.get_parameter("tolerance").get_parameter_value().double_value
         # Declare robot name, default to turtle1
         self.declare_parameter('robot_name', 'turtle1')
         self._robot_name = self.get_parameter("robot_name").get_parameter_value().string_value
@@ -132,6 +135,26 @@ class CatcherNode(Node):
             self._goal_pose.pose.position.x = self._brick_pose.position.x
             self._goal_pose.pose.position.y = self._brick_pose.position.y
             self._goal_pose_publisher.publish(self._goal_pose)
+            
+            if(self._arena_state == DROPPED):
+                self._state = CATCHED
+
+        
+        elif(self._state == CATCHED):
+            # Move the robot to the center of the arena
+            self._goal_pose.pose.position.x = 5.544445
+            self._goal_pose.pose.position.y = 5.544445
+            self._goal_pose_publisher.publish(self._goal_pose)
+            
+            # Check if the robot has reached the center of the arena
+            distance = ((self._turtle_pose.x-5.544445)**2 + (self._turtle_pose.y-5.544445)**2)**0.5
+            if(distance < self._tolerance):
+                self._state = CLEARING
+        
+        elif(self._state == CLEARING):
+            # Turn the platform to clear the brick
+            self._tilt_msg.angle = 0.35
+            self._tilt_publisher.publish(self._tilt_msg)
             
         elif(self._state == NONAVAILABLE):
             self._words_publisher.publish(self._words)

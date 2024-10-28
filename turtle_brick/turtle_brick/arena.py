@@ -53,6 +53,9 @@ class ArenaNode(Node):
         self._platform_height = self.get_parameter("platform_height").get_parameter_value().double_value
         self.declare_parameter('platform_cylinder_radius', 0.1)
         self._platform_cylinder_radius = self.get_parameter("platform_cylinder_radius").get_parameter_value().double_value
+        # Declare goal tolerance parameter, default to 0.01
+        self.declare_parameter('tolerance', 0.01)
+        self._tolerance = self.get_parameter("tolerance").get_parameter_value().double_value
         # Declare robot name, default to turtle1
         self.declare_parameter('robot_name', 'turtle1')
         self._robot_name = self.get_parameter("robot_name").get_parameter_value().string_value
@@ -301,7 +304,7 @@ class ArenaNode(Node):
                 self._physics_z_limit = 0.0
                 
             self._physics._brick = self._physics.drop(z_limit = self._physics_z_limit)
-            if(self._physics._brick[2] == self._physics_z_limit):
+            if(abs(self._physics._brick[2] - self._physics_z_limit) < self._tolerance):
                 self._x_offset = self._physics.brick[0] - self._turtle_pose.x
                 self._y_offset = self._physics.brick[1] - self._turtle_pose.y
                 self._state = DROPPED
