@@ -12,6 +12,10 @@
         <param from="$(find-pkg-share turtle_brick)/config/turtle.yaml"/>
     </node>
 
+    <node pkg="turtle_brick" exec="catcher" name="catcher" output="screen">
+        <param from="$(find-pkg-share turtle_brick)/config/turtle.yaml"/>
+    </node>
+
     <node
         pkg="tf2_ros"
         exec="static_transform_publisher"

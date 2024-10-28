@@ -3,7 +3,11 @@ from rclpy.node import Node
 from geometry_msgs.msg import PoseStamped
 from turtle_brick_interfaces.msg import Tilt
 from std_msgs.msg import Float32
-from turtle_brick.states import INIT, PLACED, DROPPING, DROPPED, FALLING
+from turtle_brick.states import INIT, PLACED, DROPPING, DROPPED, FALLING, CATCHING, NONAVAILABLE, CATCHED
+from turtlesim.msg import Pose
+from visualization_msgs.msg import MarkerArray, Marker
+import numpy as np
+
 
 class CatcherNode(Node):
 
@@ -21,6 +25,15 @@ class CatcherNode(Node):
         # Declare goal max_velocity parameter, default to 3.0
         self.declare_parameter('max_velocity', 3.0)
         self._max_velocity = self.get_parameter("max_velocity").get_parameter_value().double_value
+        # Declare gravity acceleration parameter, default to -9.81
+        self.declare_parameter('gravity', -9.81)
+        self._gravity = self.get_parameter("gravity").get_parameter_value().double_value
+        # Declare robot name, default to turtle1
+        self.declare_parameter('robot_name', 'turtle1')
+        self._robot_name = self.get_parameter("robot_name").get_parameter_value().string_value
+        # Remove '/'
+        while(self._robot_name[0] == '/'):
+            self._robot_name = self._robot_name[1:]
         
         # Setup Main Loop Timer
         self._timer = self.create_timer(1.0/self._timer_frequency, self._timer_callback)
@@ -29,10 +42,35 @@ class CatcherNode(Node):
         self._tilt_publisher = self.create_publisher(Tilt, '/tilt', 10)
         self._tilt_msg = Tilt()
         
+        # Setup goal_pose Publisher
+        self._goal_pose_publisher = self.create_publisher(PoseStamped, '/goal_pose', 10)
+        self._goal_pose = PoseStamped()
+        
         # Setup subscriber for arena's state
         self._arena_state_subscriber = self.create_subscription(Float32, '/arena_state', self._arena_state_callback, 10)
         self._arena_state_subscriber  # prevent unused variable warning
         self._arena_state = INIT
+        
+        # Setup subscriber for turtle's pose state
+        self._turtle_pose_subscriber = self.create_subscription(Pose, self._robot_name+'/pose', self._turtle_pose_callback, 10)
+        self._turtle_pose = Pose()
+        
+        # Setup subscriber for brick's pose state
+        self._brick_subscriber = self.create_subscription(Marker, '/brick', self._brick_callback, 10)
+        self._brick_pose = Pose()
+        
+        # Initialize catcher state
+        self._state = INIT
+        
+
+    def _turtle_pose_callback(self, msg):
+        self._turtle_pose.x = msg.x
+        self._turtle_pose.y = msg.y
+        self._turtle_pose.theta = msg.theta
+        
+        
+    def _brick_callback(self, msg):
+        self._brick_pose = msg.pose
         
         
     def _arena_state_callback(self, msg):
@@ -40,10 +78,33 @@ class CatcherNode(Node):
         
         
     def _timer_callback(self):
-        if(self._arena_state == DROPPING):
+        if(self._arena_state == DROPPING and self._state == INIT):
             # Check if the robot can move to catch the brick on time
-            pass
+            rx, ry = self._turtle_pose.x, self._turtle_pose.y
+            bx, by, bz = self._brick_pose.position.x, self._brick_pose.position.y, self._brick_pose.position.z
+            
+            distance = ((rx-bx)**2 + (ry-by)**2)**0.5
+            time_to_catch = distance/self._max_velocity
+            
+            z = bz - self._brick_size_z/2 - self._platform_height
+            time_to_drop = np.sqrt(-2.0*z/self._gravity)
+            
+            if(time_to_catch <= time_to_drop):
+                self._state = CATCHING
+            else:
+                self._state = NONAVAILABLE
+                
         
+        if(self._state == CATCHING):
+            # Turn the tilt to zero
+            self._tilt_msg.angle = 0.0
+            self._tilt_publisher.publish(self._tilt_msg)
+            
+            # Move the robot to catch the brick
+            self._goal_pose.pose.position.x = self._brick_pose.position.x
+            self._goal_pose.pose.position.y = self._brick_pose.position.y
+            self._goal_pose_publisher.publish(self._goal_pose)
+            
         # self._tilt_publisher.publish(self._tilt_msg)
 
 

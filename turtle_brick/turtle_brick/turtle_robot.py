@@ -8,6 +8,7 @@ from turtlesim.msg import Pose
 from geometry_msgs.msg import Twist, TransformStamped, PoseStamped
 from sensor_msgs.msg import JointState
 from turtle_brick_interfaces.msg import Tilt
+from std_srvs.srv import Empty
 
 from turtle_brick.states import MOVING, STOPPED, REACHED
 from turtle_brick.holonomic_odometry import HolonomicOdometry
@@ -93,6 +94,9 @@ class TurtleRobotNode(Node):
         # Initialize motion controller
         self._controller = HolonomicController(self._max_velocity, self._kp)
         
+        # Initialize wheel position
+        self._wheel_position = 0
+        
         
     def _timer_callback(self):
         # Publish turtle pose to TF
@@ -123,6 +127,7 @@ class TurtleRobotNode(Node):
             self._turtle_cmd = Twist()
         
         elif(self._state == REACHED):
+            self._vx, self._vy = 0.0, 0.0
             self._turtle_cmd = Twist()
             
         else:
@@ -131,8 +136,9 @@ class TurtleRobotNode(Node):
         self._turtle_cmd_publisher.publish(self._turtle_cmd)
         
         # Publish joint states
+        self._wheel_position += self._vx * 1.0/self._timer_frequency
         self._joint_states.header.stamp = self.get_clock().now().to_msg()
-        self._joint_states.position = [self._tilt_angle, self._th, 0]
+        self._joint_states.position = [self._tilt_angle, self._th, self._wheel_position]
         self._joint_states.velocity = [0, 0, 0]
         self._joint_states.effort = [0, 0, 0]
         self._joint_states_publisher.publish(self._joint_states)

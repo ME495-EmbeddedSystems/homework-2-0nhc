@@ -9,4 +9,9 @@ PLACED = 4
 DROPPING = 5
 DROPPED = 6
 FALLING = 7
-SLIDING = 8
+
+# Predifined states for catcher.py
+INIT = 3
+CATCHING = 8
+NONAVAILABLE = 9
+CATCHED = 10

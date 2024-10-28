@@ -12,7 +12,7 @@ from turtle_brick_interfaces.msg import Tilt
 from std_srvs.srv import Empty
 from turtlesim.msg import Pose
 from std_msgs.msg import Float32
-
+from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
 
 class ArenaNode(Node):
 
@@ -144,10 +144,12 @@ class ArenaNode(Node):
     
     
     def _place_callback(self, request, response):
+        # Update brick position
         new_position = [request.x, request.y, request.z]
         self._physics.brick = new_position
         response.success = True
         self._state = PLACED
+        
         return response
     
     

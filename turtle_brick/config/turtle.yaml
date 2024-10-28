@@ -3,11 +3,11 @@
     # Main loop frequency
     frequency: 100.0
     # The maximum velocity of the robot
-    max_velocity: 5.0
+    max_velocity: 3.0
     # kp for holonomic control
     kp: 0.1
     # The maximum angular velocity of the robot
-    tolerance: 0.05
+    tolerance: 0.03
     # The name of the robot
     robot_name: 'turtle1'
 
