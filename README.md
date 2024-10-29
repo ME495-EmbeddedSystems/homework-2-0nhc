@@ -1,6 +1,3 @@
-# TODO
-* Collision and friction effects
-
 # ME495 Embedded Systems Homework 2
 Author: Zhengxiao Han
 
