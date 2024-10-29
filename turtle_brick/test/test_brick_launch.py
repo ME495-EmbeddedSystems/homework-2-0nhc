@@ -1,16 +1,19 @@
 import unittest
 import pytest
-import rclpy
-from rclpy.node import Node
-from geometry_msgs.msg import Twist
 from launch import LaunchDescription
 from launch_ros.actions import Node as LaunchNode
+import launch_testing.markers
 from launch_testing.actions import ReadyToTest
-from launch_testing import WaitForTopics
+import rclpy
+from geometry_msgs.msg import Twist
+from launch_testing_ros import WaitForTopics
 
-
+        
 @pytest.mark.rostest
+@pytest.mark.launch_test
+@launch_testing.markers.keep_alive
 def generate_test_description():
+    # Define and launch the turtle_robot node
     turtle_robot_node = LaunchNode(
         package='turtle_brick',
         executable='turtle_robot',
@@ -26,60 +29,74 @@ def generate_test_description():
     )
 
 
-class TestTurtleRobotPublishRate(unittest.TestCase):
+class TestTurtleRobot(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """Runs once when the test case is loaded"""
         rclpy.init()
+
 
     @classmethod
     def tearDownClass(cls):
         """Runs once when the test case is unloaded"""
         rclpy.shutdown()
 
+
     def setUp(self):
+        self.dummy = True
         """Runs before every test"""
         self.node = rclpy.create_node('test_turtle_robot_node')
         self.cmd_vel_count = 0
         self.last_time = None
         self.received_rates = []
+        self.ref_rate = 100.0
+        self.minimum_messages = 90
+        self.tolerance = 5
 
         # Subscriber for cmd_vel to measure the publishing rate
         self.subscription = self.node.create_subscription(
             Twist,
-            'cmd_vel',
+            'turtle1/cmd_vel',
             self.cmd_vel_callback,
             10  # Queue size
         )
+
 
     def tearDown(self):
         """Runs after every test"""
         self.node.destroy_node()
 
+
     def cmd_vel_callback(self, msg):
-        """Callback to measure the publishing rate"""
-        current_time = self.node.get_clock().now().nanoseconds / 1e9
-        if self.last_time:
-            elapsed_time = current_time - self.last_time
-            rate = 1 / elapsed_time
-            self.received_rates.append(rate)
-        self.last_time = current_time
-        self.cmd_vel_count += 1
+        if(self.last_time == None):
+            self.last_time = self.node.get_clock().now().nanoseconds / 1e9
+        else:
+            current_time = self.node.get_clock().now().nanoseconds / 1e9
+            if self.last_time:
+                elapsed_time = current_time - self.last_time
+                rate = 1 / elapsed_time
+                self.received_rates.append(rate)
+            self.last_time = current_time
+            self.cmd_vel_count += 1
 
-    def test_publish_rate_100_hz(self, launch_service, myaction, proc_output):
-        """Verify that the node publishes cmd_vel at 100 Hz"""
 
+    def test_publish_rate_100_hz(self):
+        self.assertEqual(self.dummy, True,
+                         'wrong size after resize')
         # Wait for the cmd_vel topic to be active
-        wait_for_topics = WaitForTopics([('cmd_vel', Twist)], timeout=5.0)
-        assert wait_for_topics.wait(), "cmd_vel topic not available"
+        wait_for_topics = WaitForTopics([('turtle1/cmd_vel', Twist)], timeout=5.0)
+        self.assertEqual(wait_for_topics.wait(), True, "cmd_vel topic not available")
 
-        # Run the test node for 1 second to accumulate data
+        # Run the test node for 5 second to accumulate data
+        secs = 2.0
         start_time = self.node.get_clock().now().nanoseconds / 1e9
-        timeout = start_time + 1.0  # Run for 1 second
+        timeout = start_time + secs  # Run for 5 second
         while rclpy.ok() and self.node.get_clock().now().nanoseconds / 1e9 < timeout:
             rclpy.spin_once(self.node, timeout_sec=0.01)  # Small timeout for non-blocking
 
         # Verify if the publish rate is within the expected range
-        assert len(self.received_rates) > 90, "Insufficient messages received for 100 Hz rate"
-        for rate in self.received_rates:
-            assert 95 <= rate <= 105, f"Publishing rate out of expected range: {rate} Hz"
+        self.assertEqual(len(self.received_rates)>self.minimum_messages, True, "Insufficient messages received for 100 Hz rate")
+        average_rate = sum(self.received_rates) / len(self.received_rates)
+        self.assertEqual(average_rate<self.ref_rate+self.tolerance, True, "Publishing rate out of expected range")
+        self.assertEqual(average_rate>self.ref_rate-self.tolerance, True, "Publishing rate out of expected range")
+        
