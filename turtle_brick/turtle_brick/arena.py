@@ -45,24 +45,24 @@ class ArenaNode(Node):
         # Declare arena height parameter, default to 0.8
         self.declare_parameter('arena_height', 0.8)
         self._arena_height = self.get_parameter("arena_height").get_parameter_value().double_value
-        # Declare brick size x parameter, default to 0.2
-        self.declare_parameter('brick_size_x', 0.6)
+        # Declare brick size x parameter, default to 0.5
+        self.declare_parameter('brick_size_x', 0.5)
         self._brick_size_x = self.get_parameter("brick_size_x").get_parameter_value().double_value
-        # Declare brick size y parameter, default to 0.15
-        self.declare_parameter('brick_size_y', 0.5)
+        # Declare brick size y parameter, default to 0.4
+        self.declare_parameter('brick_size_y', 0.4)
         self._brick_size_y = self.get_parameter("brick_size_y").get_parameter_value().double_value
-        # Declare brick size z parameter, default to 0.075
+        # Declare brick size z parameter, default to 0.3
         self.declare_parameter('brick_size_z', 0.3)
         self._brick_size_z = self.get_parameter("brick_size_z").get_parameter_value().double_value
         # Declare gravity acceleration parameter, default to -9.81
         self.declare_parameter('gravity', -9.81)
         self._gravity = self.get_parameter("gravity").get_parameter_value().double_value
-        # Declare robot urdf parameter, default to 0.1
-        self.declare_parameter('platform_height', 0.1)
+        # Declare robot urdf parameter, default to 1.0
+        self.declare_parameter('platform_height', 1.0)
         self._platform_height = self.get_parameter("platform_height").get_parameter_value().double_value
-        # Declare slow_down_ratio parameter, default to 0.9975
-        self.declare_parameter('slow_down_ratio', 0.9975)
-        self._slow_down_ratio = self.get_parameter("slow_down_ratio").get_parameter_value().double_value
+        # Declare friction_dx parameter, default to 0.004
+        self.declare_parameter('friction_dx', 0.004)
+        self._friction_dx = self.get_parameter("friction_dx").get_parameter_value().double_value
         self.declare_parameter('platform_cylinder_radius', 0.1)
         self._platform_cylinder_radius = self.get_parameter("platform_cylinder_radius").get_parameter_value().double_value
         self._tolerance = self._platform_cylinder_radius/2
@@ -331,7 +331,7 @@ class ArenaNode(Node):
                 self._state = SLIDING
         
         elif(self._state == SLIDING):
-            self._physics._brick = self._physics.drop(z_limit=self._physics_z_limit, pitch=self._physics_pitch, slow_down_ratio=self._slow_down_ratio)
+            self._physics._brick = self._physics.drop(z_limit=self._physics_z_limit, pitch=self._physics_pitch, friction_dx=self._friction_dx)
             x = self._physics._brick[0]
             y = self._physics._brick[1]
             z = self._physics._brick[2]
