@@ -46,11 +46,13 @@ def generate_test_description():
     Launches the `turtle_robot` node from the `turtle_brick` package,
     marking it as ready for testing.
 
-    Returns:
+    Returns
+    -------
         tuple: A tuple containing:
             - LaunchDescription: The launch description with the turtle_
               robot node and ReadyToTest action.
             - dict: Dictionary with a reference to the launched node.
+
     """
     # Define and launch the turtle_robot node
     turtle_robot_node = LaunchNode(
@@ -87,7 +89,8 @@ class TestTurtleRobot(unittest.TestCase):
         rclpy.shutdown()
 
     def setUp(self):
-        """Set up the test environment for each test.
+        """
+        Set up the test environment for each test.
 
         Creates a node to listen to the `turtle1/cmd_vel` topic, initializes
         tracking variables, and defines expected publish rate and tolerance
@@ -116,13 +119,14 @@ class TestTurtleRobot(unittest.TestCase):
         self.node.destroy_node()
 
     def cmd_vel_callback(self, msg):
-        """Record message receipt times and calculate publish rates.
+        """
+        Record message receipt times and calculate publish rates.
 
         Measures the rate of incoming messages on the `turtle1/cmd_vel` topic
         and stores each calculated rate in `received_rates`.
 
-        Args:
-            msg (Twist): Message received from the `turtle1/cmd_vel` topic.
+        :param msg: The message received from the `turtle1/cmd_vel` topic.
+        :type msg: geometry_msgs.msg.Twist
         """
         if (self.last_time is None):
             self.last_time = self.node.get_clock().now().nanoseconds / 1e9
@@ -138,16 +142,19 @@ class TestTurtleRobot(unittest.TestCase):
                 self.cmd_vel_count += 1
 
     def test_publish_rate_100_hz(self):
-        """Test that the turtle_robot node publishes messages at 100 Hz.
+        """
+        Test that the turtle_robot node publishes messages at 100 Hz.
 
         Waits for the `cmd_vel` topic to be active and accumulates message
         data for a set time period. Then, checks that the average publish
         rate falls within the specified tolerance of the target rate.
 
-        Raises:
+        Raises
+        ------
             AssertionError: If the `cmd_vel` topic is not available, if
                             insufficient messages are received,
             or if the publish rate is outside the acceptable range.
+
         """
         self.assertEqual(self.dummy, True,
                          'wrong size after resize')

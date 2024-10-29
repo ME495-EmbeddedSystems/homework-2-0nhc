@@ -23,9 +23,10 @@ class HolonomicController:
         """
         Initialize with maximum velocity and proportional gain.
 
-        Args:
-            max_vel (float): The maximum velocity the robot can achieve.
-            kp (float): Proportional gain for the angular velocity control.
+        :param max_vel: The maximum velocity the robot can achieve.
+        :type max_vel: float
+        :param kp: Proportional gain for the angular velocity control.
+        :type: float
         """
         self._max_vel = max_vel
         self._kp = kp
@@ -34,13 +35,14 @@ class HolonomicController:
         """
         Compute the velocities required to move the robot towards a goal.
 
-        Args:
-            current_state (tuple): The current state of the robot (x, y, theta)
-            goal (tuple): The goal position as (xg, yg).
+        :param current_state: The current state of the robot (x, y, theta)
+        :type current_state: [float, ffloat, float]
+        :param goal: The goal position as (xg, yg).
+        :type goal: [float, float]
 
-        Returns:
-            tuple: A tuple (vel_x, vel_y, vel_theta) representing the computed
-                   velocities along x, y, and theta to move towards the goal.
+        :return: (vel_x, vel_y, vel_theta) representing the computed
+                 velocities along x, y, and theta to move towards the goal.
+        :rtype: tuple
         """
         # Load args for programming convenience
         x = current_state[0]

@@ -37,7 +37,8 @@ def generate_a_random_physics_engine():
     position, platform radius,
     and timestep. Gravity is fixed at -9.81 m/s².
 
-    Returns:
+    Returns
+    -------
         tuple: A tuple containing:
             - `physics` (World): An instance of the World class with
               randomized parameters.
@@ -45,6 +46,7 @@ def generate_a_random_physics_engine():
             - `gravity` (float): Gravitational acceleration (fixed at -9.81).
             - `radius` (float): Radius of the platform.
             - `dt` (float): Timestep for the physics simulation.
+
     """
     # Initialize the world randomly
     # -5m < x < 5m

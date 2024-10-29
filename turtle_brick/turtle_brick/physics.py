@@ -23,11 +23,14 @@ class World:
         """
         Initialize with parameters.
 
-        Args:
-            brick (tuple): The (x, y, z) location of the brick.
-            gravity (float): The acceleration due to gravity in m/s^2.
-            radius (float): The radius of the platform.
-            dt (float): Timestep in seconds for each physics simulation update.
+        :param brick: The (x, y, z) location of the brick.
+        :type brick: [float, float, float]
+        :param gravity: The acceleration due to gravity in m/s^2.
+        :type gravity: float
+        :param radius: The radius of the platform.
+        :type radius: float
+        :param dt: Timestep in seconds for each physics simulation update.
+        :type dt: float
         """
         self._brick = brick
         self._gravity = gravity
@@ -44,8 +47,8 @@ class World:
         """
         Get the current location of the brick.
 
-        Returns:
-            tuple: The (x, y, z) location of the brick.
+        :return: The (x, y, z) location of the brick.
+        :rtype: tuple
         """
         return self._brick
 
@@ -54,8 +57,8 @@ class World:
         """
         Set the brick's location and reset its velocity.
 
-        Args:
-            location (tuple): The new (x, y, z) location of the brick.
+        :param location: The new (x, y, z) location of the brick.
+        :type location: tuple
         """
         self._brick = location
         self._xdot = 0.0
@@ -66,18 +69,17 @@ class World:
         """
         Update the brick's location.
 
-        Args:
-            z_limit (float, optional): The lower limit on the z-axis for the
-                                       brick's position. Defaults to 0.0.
-            pitch (float, optional): The pitch angle of the platform,
-                                     affecting x-axis acceleration. Defaults
-                                     to 0.0.
-            friction_dx (float, optional): Friction coefficient affecting
-                                           horizontal (x-axis) deceleration.
-                                           Defaults to 0.0.
+        :param z_limit: The lower limit on the z-axis for the brick's position.
+        :type z_limit: float
+        :param pitch: The pitch angle of the platform, affecting x-axis
+                      acceleration.
+        :type pitch: float
+        :param friction_dx: Friction coefficient affecting horizontal (x-axis)
+                            deceleration.
+        :type friction_dx: float
 
-        Returns:
-            tuple: Updated (x, y, z) location of the brick.
+        :return: Updated (x, y, z) location of the brick.
+        :rtype: tuple
         """
         if (self._brick[2] <= z_limit):
             self._brick[0] += self._xdot * self._dt

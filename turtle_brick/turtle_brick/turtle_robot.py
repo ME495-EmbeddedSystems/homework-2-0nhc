@@ -12,7 +12,8 @@
 
 #   0. You just DO WHAT THE FUCK YOU WANT TO.
 
-"""The turtle_robot ROS 2 node for hopmework-2.
+"""
+The turtle_robot ROS 2 node for hopmework-2.
 
 The turtle_robot node communicates through several ROS 2 protocols:
 
@@ -28,7 +29,7 @@ SUBSCRIBERS:
                                                 to reach
   + tilt (turtle_brick_interfaces.msg.Tilt) - The platform's rotating angle
 
-PARAMETERS:
+ROS_PARAMETERS:
   + frequency (double) - Timer frequency for the main loop
   + max_velocity (double) - The maximum velocity of the turtle
   + kp (double) - The proportional gain for the controller
@@ -62,7 +63,8 @@ from turtlesim.msg import Pose
 
 
 class TurtleRobotNode(Node):
-    """The turtle_robot ROS 2 node for hopmework-2.
+    """
+    The turtle_robot ROS 2 node for hopmework-2.
 
     The turtle_robot node communicates through several ROS 2 protocols:
 
@@ -78,7 +80,7 @@ class TurtleRobotNode(Node):
                                                   to reach
     + tilt (turtle_brick_interfaces.msg.Tilt) - The platform's rotating angle
 
-    PARAMETERS:
+    ROS_PARAMETERS:
     + frequency (double) - Timer frequency for the main loop
     + max_velocity (double) - The maximum velocity of the turtle
     + kp (double) - The proportional gain for the controller
@@ -90,7 +92,8 @@ class TurtleRobotNode(Node):
     """
 
     def __init__(self):
-        """Initialize the TurtleRobotNode.
+        """
+        Initialize the TurtleRobotNode.
 
         Sets up ROS 2 parameters, initializes subscriptions, publishers,
         timer callbacks, transforms, and robot state.
@@ -189,7 +192,8 @@ class TurtleRobotNode(Node):
         self._wheel_position = 0
 
     def _timer_callback(self):
-        """Timer callback for periodic control and state updates.
+        """
+        Timer callback for periodic control and state updates.
 
         Publishes transforms, odometry, and joint states. Updates the
         turtle's movement based on the current state and controller commands.
@@ -277,58 +281,64 @@ class TurtleRobotNode(Node):
         self._turtle_cmd_publisher.publish(self._turtle_cmd)
 
     def _goal_pose_callback(self, msg):
-        """Receiving goal pose.
+        """
+        Receiving goal pose.
 
         Sets the state to moving and updates the goal pose.
 
-        Args:
-            msg (PoseStamped): The target pose for the turtle robot.
+        :param msg: The target pose for the turtle robot.
+        :type msg: geometry_msgs.msg.PoseStamped
         """
         if (self._state == STOPPED):
             self._state = MOVING
         self._goal_pose = msg
 
     def _turtle_pose_callback(self, msg):
-        """Receiving the turtle's current pose.
+        """
+        Receiving the turtle's current pose.
 
         Updates the internal pose state of the turtle robot.
 
-        Args:
-            msg (Pose): The current pose of the turtle.
+        :param msg: The current pose of the turtle.
+        :type msg: turtlesim.msg.Pose
         """
         self._turtle_pose.x = msg.x
         self._turtle_pose.y = msg.y
 
     def _tilt_callback(self, msg):
-        """Receiving tilt angle data.
+        """
+        Receiving tilt angle data.
 
         Updates the internal tilt angle state.
 
-        Args:
-            msg (Tilt): Contains the tilt angle for the robot.
+        :param msg: The tilt angle for the robot.
+        :type msg: turtle_brick_interfaces.msg.Tilt
         """
         self._tilt_angle = msg.angle
 
     def _euclidean_distance(self, p1, p2):
-        """Calculate Euclidean distance between two points.
+        """
+        Calculate Euclidean distance between two points.
 
-        Args:
-            p1 (list[float]): The first point [x, y].
-            p2 (list[float]): The second point [x, y].
+        :param p1: The first point [x, y].
+        :type p1: list[float]
+        :param p2: The second point [x, y].
+        :type p2: list[float]
 
-        Returns:
-            float: The Euclidean distance between the two points.
+        :return: The Euclidean distance between the two points.
+        :rtype: float
         """
         return np.sqrt(((p1[0] - p2[0])**2 + (p1[1] - p2[1])**2))
 
 
 def main(args=None):
-    """TurtleRobotNode.
+    """
+    TurtleRobotNode.
 
     Initializes the ROS 2 node, spins to process callbacks, and shuts down.
 
-    Args:
-        args (list, optional): Command-line arguments passed to rclpy.init().
+    :param args: Command-line arguments passed to rclpy.init().
+    :type args: list
     """
     rclpy.init(args=args)
     turtle_robot_node = TurtleRobotNode()

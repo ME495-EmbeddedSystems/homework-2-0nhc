@@ -12,7 +12,8 @@
 
 #   0. You just DO WHAT THE FUCK YOU WANT TO.
 
-"""The arena ROS 2 node for hopmework-2.
+"""
+The arena ROS 2 node for hopmework-2.
 
 The arena node communicates through several ROS 2 protocols:
 
@@ -31,7 +32,7 @@ SERVICES:
     platform
   + drop (std_srvs.srv.Empty) - To drop the brick from the platform
 
-PARAMETERS:
+ROS_PARAMETERS:
   + frequency (double) - Timer frequency for the main loop
   + rainbow_frequency (double) - Timer frequency to control the rainbow effect
   + physics_frequency (double) - Timer frequency to control the physics of the
@@ -82,7 +83,8 @@ from visualization_msgs.msg import Marker, MarkerArray
 
 
 class ArenaNode(Node):
-    """The arena ROS 2 node for hopmework-2.
+    """
+    The arena ROS 2 node for hopmework-2.
 
     The arena node communicates through several ROS 2 protocols:
 
@@ -101,7 +103,7 @@ class ArenaNode(Node):
       platform
     + drop (std_srvs.srv.Empty) - To drop the brick from the platform
 
-    PARAMETERS:
+    ROS_PARAMETERS:
     + frequency (double) - Timer frequency for the main loop
     + rainbow_frequency (double) - Timer frequency to control the rainbow
       effect
@@ -122,7 +124,8 @@ class ArenaNode(Node):
     """
 
     def __init__(self):
-        """Initialize the ArenaNode with configurable ROS parameters.
+        """
+        Initialize the ArenaNode with configurable ROS parameters.
 
         Sets up ROS 2 parameters, initializes publishers, subscribers,
         services, timers, and physics-related attributes for the arena
@@ -307,48 +310,52 @@ class ArenaNode(Node):
         self._y_offset = 0.0
 
     def _tilt_callback(self, msg):
-        """Cache tilt angle updates.
+        """
+        Cache tilt angle updates.
 
-        Args:
-            msg (Tilt): The tilt angle message.
+        :param msg: The tilt angle message.
+        :type msg: Tilt
         """
         self._tilt_angle = msg.angle
 
     def _turtle_pose_callback(self, msg):
-        """Receiving the turtle's pose.
+        """
+        Receiving the turtle's pose.
 
-        Args:
-            msg (Pose): The current pose of the turtle in the arena.
+        :param msg: The turtle's pose message.
+        :type msg: Pose
         """
         self._turtle_pose.x = msg.x
         self._turtle_pose.y = msg.y
         self._turtle_pose.theta = msg.theta
 
     def _drop_callback(self, request, response):
-        """Handle the '/drop' service, updating the arena state.
+        """
+        Handle the '/drop' service, updating the arena state.
 
-        Args:
-            request (Empty): Empty service request.
-            response (Empty): Empty service response.
+        :param request: Empty service request.
+        :type request: Empty
+        :param response: Empty service response.
+        :type response: Empty
 
-        Returns:
-            Empty: The response after handling the drop request.
+        :return: The response after handling the drop request.
+        :rtype: Empty
         """
         if (self._state == PLACED):
             self._state = DROPPING
         return response
 
     def _place_callback(self, request, response):
-        """Handle the '/place' service, updating brick position.
+        """
+        Handle the '/place' service, updating brick position.
 
-        Args:
-            request (Place): Contains target position coordinates (x, y, z)
-                             for the brick.
-            response (Place.Response): Response indicating success or failure
-                                       of placement.
+        :param request: The target position for the brick.
+        :type request: Place
+        :param response: The response indicating success or failure.
+        :type response: Place.Response
 
-        Returns:
-            Place.Response: The updated response with success set to True.
+        :return: The response after handling the place request.
+        :rtype: Place.Response
         """
         # Update brick position
         new_position = [request.x, request.y, request.z]
@@ -363,14 +370,17 @@ class ArenaNode(Node):
                          boundary_width,
                          arena_width,
                          arena_height):
-        """Initialize arena boundaries with markers.
+        """
+        Initialize arena boundaries with markers.
 
-        Args:
-            num_markers_per_side (int): Number of markers on each boundary
-                                        side.
-            boundary_width (float): Width of each boundary.
-            arena_width (float): Width of the arena.
-            arena_height (float): Height of the arena.
+        :param num_markers_per_side: Number of markers on each boundary side.
+        :type num_markers_per_side: int
+        :param boundary_width: Width of each boundary.
+        :type boundary_width: float
+        :param arena_width: Width of the arena.
+        :type arena_width: float
+        :param arena_height: Height of the arena.
+        :type arena_height: float
         """
         # Side 1
         for i in range(0, num_markers_per_side):
@@ -443,17 +453,42 @@ class ArenaNode(Node):
     def _generate_marker(self, marker_id, x, y, z, qx, qy, qz, qw,
                          scale_x, scale_y, scale_z,
                          r=0.0, g=0.0, b=1.0, a=1.0):
-        """Generate a visual marker with specified properties.
+        """
+        Generate a visual marker with specified properties.
 
-        Args:
-            id (int): Unique ID for the marker.
-            x, y, z (float): Position coordinates for the marker.
-            qx, qy, qz, qw (float): Orientation quaternion values.
-            scale_x, scale_y, scale_z (float): Scale dimensions of the marker.
-            r, g, b, a (float): Color RGBA values.
+        :param marker_id: Unique ID for the marker.
+        :type marker_id: int
+        :param x: Position coordinates for the marker.
+        :type x: float
+        :param y: Position coordinates for the marker.
+        :type y: float
+        :param z: Position coordinates for the marker.
+        :type z: float
+        :param qx: Orientation quaternion values.
+        :type qx: float
+        :param qy: Orientation quaternion values.
+        :type qy: float
+        :param qz: Orientation quaternion values.
+        :type qz: float
+        :param qw: Orientation quaternion values.
+        :type qw: float
+        :param scale_x: Scale dimensions of the marker.
+        :type scale_x: float
+        :param scale_y: Scale dimensions of the marker.
+        :type scale_y: float
+        :param scale_z: Scale dimensions of the marker.
+        :type scale_z: float
+        :param r: Color RGBA values.
+        :type r: float
+        :param g: Color RGBA values.
+        :type g: float
+        :param b: Color RGBA values.
+        :type b: float
+        :param a: Color RGBA values.
+        :type a: float
 
-        Returns:
-            Marker: A configured marker object.
+        :return: A configured marker object.
+        :rtype: Marker
         """
         marker = Marker()
         marker.header.frame_id = 'world'
@@ -478,7 +513,8 @@ class ArenaNode(Node):
         return marker
 
     def _main_loop_timer_callback(self):
-        """Timer main loop, publishing state and boundary updates.
+        """
+        Timer main loop, publishing state and boundary updates.
 
         Publishes the current state, updates boundaries, and handles brick
         pose based on the arena state and physics.
@@ -594,7 +630,8 @@ class ArenaNode(Node):
             self._state = FALLING
 
     def _physics_timer_callback(self):
-        """Physics updates, handling brick dropping and sliding.
+        """
+        Physics updates, handling brick dropping and sliding.
 
         Updates brick position based on physics and changes state as necessary
         based on the brick's position and interactions.
@@ -638,7 +675,8 @@ class ArenaNode(Node):
                 z_limit=self._physics_z_limit, pitch=self._physics_pitch)
 
     def _rainbow_timer_callback(self):
-        """Dynamically changing marker colors based on a rainbow pattern.
+        """
+        Dynamically changing marker colors based on a rainbow pattern.
 
         Uses time-based color adjustments to simulate a rainbow effect on
         boundary markers.
@@ -653,13 +691,14 @@ class ArenaNode(Node):
         self._brick_marker.color = color
 
     def get_rainbow_color(self, position):
-        """Calculate color in the rainbow spectrum based on position.
+        """
+        Calculate color in the rainbow spectrum based on position.
 
-        Args:
-            position (float): Position value to generate the color
+        :param position: Position value to generate the color.
+        :type position: float
 
-        Returns:
-            ColorRGBA: Color with calculated RGB values and full opacity.
+        :return: Color with calculated RGB values and full opacity.
+        :rtype: ColorRGBA
         """
         r = max(0.0, math.sin(position * 2 * math.pi + 0) * 0.5 + 0.5)
         g = max(0.0, math.sin(
@@ -670,12 +709,13 @@ class ArenaNode(Node):
 
 
 def main(args=None):
-    """Entry point for the ArenaNode.
+    """
+    Entry point for the ArenaNode.
 
     Initializes the ROS 2 node, spins to process callbacks, and shuts down.
 
-    Args:
-        args (list, optional): Command-line arguments passed to rclpy.init().
+    :param args: Command-line arguments passed to rclpy.init().
+    :type args: list, optional
     """
     rclpy.init(args=args)
     dummy_node = ArenaNode()

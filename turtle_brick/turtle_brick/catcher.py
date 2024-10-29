@@ -12,7 +12,8 @@
 
 #   0. You just DO WHAT THE FUCK YOU WANT TO.
 
-"""The catcher ROS 2 node for hopmework-2.
+"""
+The catcher ROS 2 node for hopmework-2.
 
 The catcher node communicates through several ROS 2 protocols:
 
@@ -29,7 +30,7 @@ SUBSCRIBERS:
   + turtle1/pose (turtlesim.msg.Pose) - Indicating the pose of the turtle.
 + brick (visualization_msgs.msg.Marker) - Indicating the pose of the brick.
 
-PARAMETERS:
+ROS_PARAMETERS:
   + frequency (double) - Timer frequency for the main loop
   + platform_height (double) - The height of the platform
   + brick_size_z (double) - The size of the brick in z-axis
@@ -59,7 +60,8 @@ from visualization_msgs.msg import Marker
 
 
 class CatcherNode(Node):
-    """The catcher ROS 2 node for hopmework-2.
+    """
+    The catcher ROS 2 node for hopmework-2.
 
     The catcher node communicates through several ROS 2 protocols:
 
@@ -76,7 +78,7 @@ class CatcherNode(Node):
     + turtle1/pose (turtlesim.msg.Pose) - Indicating the pose of the turtle.
     + brick (visualization_msgs.msg.Marker) - Indicating the pose of the brick.
 
-    PARAMETERS:
+    ROS_PARAMETERS:
     + frequency (double) - Timer frequency for the main loop
     + platform_height (double) - The height of the platform
     + brick_size_z (double) - The size of the brick in z-axis
@@ -87,7 +89,8 @@ class CatcherNode(Node):
     """
 
     def __init__(self):
-        """Initialize ROS parameters, publishers, and subscribers.
+        """
+        Initialize ROS parameters, publishers, and subscribers.
 
         Sets up the node's main loop, tilt and goal position publishers, and
         the arena and brick state subscriptions.
@@ -180,33 +183,37 @@ class CatcherNode(Node):
         self._state = INIT
 
     def _turtle_pose_callback(self, msg):
-        """Ppdating the turtle's pose.
+        """
+        Update the turtle's pose.
 
-        Args:
-            msg (Pose): The turtle's current position and orientation.
+        param: msg: The turtle's current position and orientation.
+        type: msg (Pose)
         """
         self._turtle_pose.x = msg.x
         self._turtle_pose.y = msg.y
         self._turtle_pose.theta = msg.theta
 
     def _brick_callback(self, msg):
-        """Update the brick's pose.
+        """
+        Update the brick's pose.
 
-        Args:
-            msg (Marker): The marker message containing the brick's pose.
+        :param msg: The marker message containing the brick's pose.
+        :type msg: Marker
         """
         self._brick_pose = msg.pose
 
     def _arena_state_callback(self, msg):
-        """Update the arena state.
+        """
+        Update the arena state.
 
-        Args:
-            msg (Float32): The arena state as a floating-point value.
+        :param msg: The arena state as a floating-point value.
+        :type msg: Float32
         """
         self._arena_state = msg.data
 
     def _timer_callback(self):
-        """Control the catcher's actions.
+        """
+        Control the catcher's actions.
 
         This function checks conditions, updates the catcher's state, and
         sends commands to catch or clear bricks as needed based on the arena's
@@ -266,12 +273,13 @@ class CatcherNode(Node):
 
 
 def main(args=None):
-    """CatcherNode.
+    """
+    CatcherNode.
 
     Initializes the ROS 2 node, spins to process callbacks, and shuts down.
 
-    Args:
-        args (list, optional): Command-line arguments passed to rclpy.init().
+    :param args: Command-line arguments passed to rclpy.init().
+    :type args: list, optional
     """
     rclpy.init(args=args)
     dummy_node = CatcherNode()
