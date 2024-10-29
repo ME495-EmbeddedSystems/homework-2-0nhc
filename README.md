@@ -16,4 +16,4 @@ https://github.com/user-attachments/assets/e9bae496-e71f-4273-88cc-ba9ad8733fec
 
 4. Here is a video of the turtle when the brick cannot be caught
 
-https://github.com/user-attachments/assets/e22e79b6-41a3-43bd-87df-2db5068c4728
+https://github.com/user-attachments/assets/033fed74-d9a3-4f34-bacf-0865f6c4383b
