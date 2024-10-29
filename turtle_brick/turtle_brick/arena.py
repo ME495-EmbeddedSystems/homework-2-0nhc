@@ -5,7 +5,7 @@ from geometry_msgs.msg import Point, PoseStamped
 import tf_transformations
 import numpy as np
 import tf2_ros
-from turtle_brick.states import INIT, PLACED, DROPPING, DROPPED, FALLING
+from turtle_brick.states import INIT, PLACED, DROPPING, DROPPED, FALLING, SLIDING
 from turtle_brick.physics import World
 from turtle_brick_interfaces.srv import Place
 from turtle_brick_interfaces.msg import Tilt
@@ -314,6 +314,45 @@ class ArenaNode(Node):
             self._brick_marker.pose.orientation.y = q[1]
             self._brick_marker.pose.orientation.z = q[2]
             self._brick_marker.pose.orientation.w = q[3]
+            
+            dx = abs(self._brick_pose.pose.position.x - self._turtle_pose.x)
+            # if(dx < self._platform_cylinder_radius):
+            if(self._physics._brick[2] > self._brick_size_z/2):
+                self._physics_z_limit = self._platform_height + self._brick_size_z/2 - dx*np.tan(self._tilt_angle)
+                self._physics_pitch = self._tilt_angle
+                self._physics._brick = self._physics.drop(z_limit=self._physics_z_limit, pitch=self._physics_pitch)
+            else:
+                self._physics_z_limit = 0.0
+                self._physics_pitch = 0.0
+                self.get_logger().info("Brick fell off the platform")
+                self._state = SLIDING
+        
+        elif(self._state == SLIDING):
+            self._physics._brick = self._physics.drop(z_limit=self._physics_z_limit, pitch=self._physics_pitch, slow_down_ratio=0.995)
+            x = self._physics._brick[0]
+            y = self._physics._brick[1]
+            z = self._physics._brick[2]
+            if(self._physics._brick[0] <= -0.5+self._brick_size_x/2):
+                x = -0.5+self._brick_size_x/2
+                self._physics._xdot = -self._physics._xdot
+            if(self._physics._brick[0] >= self._arena_width-0.5-self._brick_size_x/2):
+                x = self._arena_width-0.5-self._brick_size_x/2
+                self._physics._xdot = -self._physics._xdot
+            if(self._physics._brick[1] <= -0.5+self._brick_size_y/2):
+                y = -0.5+self._brick_size_y/2
+            if(self._physics._brick[1] >= self._arena_width-0.5-self._brick_size_y/2):
+                y = self._arena_width-0.5-self._brick_size_y/2
+            if(self._physics._brick[2] == self._physics_z_limit):
+                self._brick_pose.pose.orientation.x = 0.0
+                self._brick_pose.pose.orientation.y = 0.0
+                self._brick_pose.pose.orientation.z = 0.0
+                self._brick_pose.pose.orientation.w = 1.0
+                self._brick_marker.pose.orientation.x = 0.0
+                self._brick_marker.pose.orientation.y = 0.0
+                self._brick_marker.pose.orientation.z = 0.0
+                self._brick_marker.pose.orientation.w = 1.0
+            self._physics._brick[0] = x
+            self._physics._brick[1] = y
         
         if(self._tilt_angle != 0.0 and self._state == DROPPED):
             self._state = FALLING

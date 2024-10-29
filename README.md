@@ -1,7 +1,5 @@
 # TODO
 * Collision and friction effects
-* test_brick_launch.py
-
 
 # ME495 Embedded Systems Homework 2
 Author: Zhengxiao Han

@@ -23,7 +23,6 @@ class World:
         self._ydot = 0.0
         self._zdot = 0.0
         self._t = 0.0
-        self._friction_coefficient = 0.9
         
 
     @property
@@ -51,14 +50,14 @@ class World:
         self._t = 0.0
     
     
-    def drop(self, z_limit=0.0, pitch=0.0):
+    def drop(self, z_limit=0.0, pitch=0.0, slow_down_ratio=1.0):
         """
         Update the brick's location by having it fall in gravity for one timestep
         """
         if(self._brick[2] <= z_limit):
             self._brick[0] += self._xdot * self._dt
             self._brick[2] = z_limit
-            self._xdot = self._xdot * self._friction_coefficient
+            self._xdot = self._xdot * slow_down_ratio
             self._zdot = 0.0
         else:
             self._brick[0] += self._xdot * self._dt
