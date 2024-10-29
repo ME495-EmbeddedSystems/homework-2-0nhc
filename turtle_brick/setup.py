@@ -12,9 +12,12 @@
 
 #   0. You just DO WHAT THE FUCK YOU WANT TO.
 
-from setuptools import find_packages, setup
-import os
+"""Setup file for a ROS 2 package."""
+
 from glob import glob
+import os
+
+from setuptools import setup
 
 package_name = 'turtle_brick'
 
@@ -35,7 +38,11 @@ setup(
     zip_safe=True,
     maintainer='Zhengxiao Han',
     maintainer_email='hanzx@u.northwestern.edu',
-    description="This package includes an arena node that has a physics engine to simulate a brick falling, a holonomic turtle controller to control the turetle to the reference position, and a catcher node to organize turtle's behaviors so that it can catch the falling brick.",
+    description="This package includes an arena node that has a physics engine\
+                 to simulate a brick falling, a holonomic turtle controller to\
+                 control the turetle to the reference position, and a catcher\
+                 node to organize turtle's behaviors so that it can catch the\
+                 falling brick.",
     license='WTFPL',
     tests_require=['pytest'],
     entry_points={

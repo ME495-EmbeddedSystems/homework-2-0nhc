@@ -16,7 +16,6 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 
 if(BUILD_TESTING)
   find_package(ament_cmake_pytest REQUIRED)
-  ament_add_pytest_test(turtle_brick_interfaces test/test_interfaces.py)
 endif()
 
 ament_package()

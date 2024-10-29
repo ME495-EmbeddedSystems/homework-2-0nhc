@@ -1,4 +1,4 @@
-# Copyright 2015 Open Source Robotics Foundation, Inc.
+# Copyright 2017 Open Source Robotics Foundation, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,22 +13,21 @@
 # limitations under the License.
 
 """
-Testing file for copyright.
+Test for flake8 compliance.
 
-This module contains tests for the turtle_brick package.
+This module contains tests to check the code style of the the package
 """
 
-from ament_copyright.main import main
+from ament_flake8.main import main_with_errors
 
 import pytest
 
 
-# Remove the `skip` decorator once the source file(s) have a copyright header
-@pytest.mark.skip(reason='No copyright header has been placed in the' +
-                         'generated source file.')
-@pytest.mark.copyright
+@pytest.mark.flake8
 @pytest.mark.linter
-def test_copyright():
-    """Test that the source files have a valid license header."""
-    rc = main(argv=['.', 'test'])
-    assert rc == 0, 'Found errors'
+def test_flake8():
+    """Test that code is flake8 compliant."""
+    rc, errors = main_with_errors(argv=[])
+    assert rc == 0, \
+        'Found %d code style errors / warnings:\n' % len(errors) + \
+        '\n'.join(errors)
