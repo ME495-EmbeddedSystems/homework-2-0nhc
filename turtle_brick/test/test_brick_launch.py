@@ -1,3 +1,6 @@
+"""
+This module contains tests for the turtle_robot node in the turtle_brick package.
+"""
 import unittest
 import pytest
 from launch import LaunchDescription
@@ -9,10 +12,22 @@ from geometry_msgs.msg import Twist
 from launch_testing_ros import WaitForTopics
 import numpy as np
         
+        
 @pytest.mark.rostest
 @pytest.mark.launch_test
 @launch_testing.markers.keep_alive
 def generate_test_description():
+    """
+    Generate a launch description for testing the turtle_robot node.
+
+    Launches the `turtle_robot` node from the `turtle_brick` package,
+    marking it as ready for testing.
+
+    Returns:
+        tuple: A tuple containing:
+            - `LaunchDescription`: The launch description with the turtle_robot node and ReadyToTest action.
+            - dict: Dictionary with a reference to the launched node.
+    """
     # Define and launch the turtle_robot node
     turtle_robot_node = LaunchNode(
         package='turtle_brick',
@@ -30,21 +45,26 @@ def generate_test_description():
 
 
 class TestTurtleRobot(unittest.TestCase):
+    """Test case for validating the publishing rate of the turtle_robot's cmd_vel topic."""
     @classmethod
     def setUpClass(cls):
-        """Runs once when the test case is loaded"""
+        """Initialize the ROS 2 system once before all tests."""
         rclpy.init()
 
 
     @classmethod
     def tearDownClass(cls):
-        """Runs once when the test case is unloaded"""
+        """Shutdown the ROS 2 system once after all tests."""
         rclpy.shutdown()
 
 
     def setUp(self):
+        """Set up the test environment for each test.
+
+        Creates a node to listen to the `turtle1/cmd_vel` topic, initializes tracking variables,
+        and defines expected publish rate and tolerance for cmd_vel messages.
+        """
         self.dummy = True
-        """Runs before every test"""
         self.node = rclpy.create_node('test_turtle_robot_node')
         self.cmd_vel_count = 0
         self.last_time = None
@@ -64,11 +84,19 @@ class TestTurtleRobot(unittest.TestCase):
 
 
     def tearDown(self):
-        """Runs after every test"""
+        """Clean up after each test by destroying the test node."""
         self.node.destroy_node()
 
 
     def cmd_vel_callback(self, msg):
+        """Callback to record message receipt times and calculate publish rates.
+
+        Measures the rate of incoming messages on the `turtle1/cmd_vel` topic
+        and stores each calculated rate in `received_rates`.
+
+        Args:
+            msg (Twist): Message received from the `turtle1/cmd_vel` topic.
+        """
         if(self.last_time == None):
             self.last_time = self.node.get_clock().now().nanoseconds / 1e9
         else:
@@ -84,6 +112,15 @@ class TestTurtleRobot(unittest.TestCase):
 
 
     def test_publish_rate_100_hz(self):
+        """Test that the turtle_robot node publishes cmd_vel messages at approximately 100 Hz.
+
+        Waits for the `cmd_vel` topic to be active and accumulates message data for a set time period.
+        Then, checks that the average publish rate falls within the specified tolerance of the target rate.
+
+        Raises:
+            AssertionError: If the `cmd_vel` topic is not available, if insufficient messages are received,
+            or if the publish rate is outside the acceptable range.
+        """
         self.assertEqual(self.dummy, True,
                          'wrong size after resize')
         # Wait for the cmd_vel topic to be active

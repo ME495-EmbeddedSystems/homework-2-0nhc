@@ -1,14 +1,30 @@
+"""
+This module contains tests for the physics simulation of the brick object in the virtual world.
+"""
 import random
 import numpy as np
 from turtle_brick.physics import World
 
 
-# Set the number of experiments in order to test the function 
-# under random conditions.
+# Set the number of experiments to test the function under random conditions.
 NUM_EXP = 100
 
 
 def generate_a_random_physics_engine():
+    """
+    Generate a randomized physics engine instance.
+
+    Creates a `World` instance with random initial conditions for the brick position, platform radius,
+    and timestep. Gravity is fixed at -9.81 m/s².
+
+    Returns:
+        tuple: A tuple containing:
+            - `physics` (World): An instance of the World class with randomized parameters.
+            - `brick` (list): Initial (x, y, z) location of the brick.
+            - `gravity` (float): Gravitational acceleration (fixed at -9.81).
+            - `radius` (float): Radius of the platform.
+            - `dt` (float): Timestep for the physics simulation.
+    """
     # Initialize the world randomly
     # -5m < x < 5m
     brick = [random.random()*10-5,
@@ -23,12 +39,27 @@ def generate_a_random_physics_engine():
 
 
 def test_brick_property():
+    """
+    Test that the `brick` property of the `World` instance matches the initial position.
+
+    Runs `NUM_EXP` experiments, each time generating a random `World` instance and checking
+    if the `brick` property correctly reflects the initial brick position.
+    """
     for i in range(NUM_EXP):
         physics, brick, gravity, radius, dt = generate_a_random_physics_engine()
         assert physics.brick == brick
 
 
 def test_brick_setter():
+    """
+    Test the `brick` setter of the `World` class.
+
+    Runs `NUM_EXP` experiments, each time setting a new brick position in a random `World` instance.
+    Verifies that:
+        - The brick position is updated.
+        - The time (`_t`) is reset to 0.
+        - The velocities (`_xdot`, `_zdot`) are reset to 0.
+    """
     for i in range(NUM_EXP):
         physics, brick, gravity, radius, dt = generate_a_random_physics_engine()
         physics.drop(z_limit=-np.inf)
@@ -43,6 +74,15 @@ def test_brick_setter():
 
 
 def test_brick_drop():
+    """
+    Test the `drop` function of the `World` class with and without a z-axis limit.
+
+    Runs `NUM_EXP` experiments where the brick is dropped under gravity, checking:
+        1. Without a `z_limit`, ensuring the brick moves along the x, y, and z axes.
+        2. With a `z_limit`, ensuring the brick movement stops at the specified limit on the z-axis.
+    
+    Verifies that the brick’s position updates correctly according to the calculated velocities and timestep.
+    """
     for i in range(NUM_EXP):
         # First, test without the effect of z_limit
         physics, brick, gravity, radius, dt = generate_a_random_physics_engine()
