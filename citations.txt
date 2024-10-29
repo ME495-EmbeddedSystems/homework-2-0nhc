@@ -1,0 +1,1 @@
+[1] The part is derived from Matt's code. See line 45 in https://github.com/m-elwin/me495_markers/blob/ros2/me495_markers/gripper.py
