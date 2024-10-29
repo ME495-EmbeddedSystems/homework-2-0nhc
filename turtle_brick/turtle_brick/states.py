@@ -1,3 +1,6 @@
+"""
+This module contains predefined states for the turtle robot, arena, and catcher objects.
+"""
 # Predifined states for turtle_robot.py
 MOVING = 0
 """int: The state where the turtle robot is actively moving toward a target."""
@@ -7,7 +10,6 @@ STOPPED = 1
 
 REACHED = 2
 """int: The state where the turtle robot has reached its destination or target."""
-
 
 # Predifined states for arena.py
 INIT = 3
@@ -27,7 +29,6 @@ FALLING = 7
 
 SLIDING = 8
 """int: The state where an object is moving across a surface without lifting."""
-
 
 # Predifined states for catcher.py
 INIT = 3

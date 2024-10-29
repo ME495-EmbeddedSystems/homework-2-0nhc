@@ -430,6 +430,7 @@ class ArenaNode(Node):
             self._tf_broadcaster.sendTransform(t)
              
         if(self._state == FALLING):
+            # Brick's orientation is enabled
             R = 0.0
             P = self._tilt_angle
             Y = 0.0
@@ -443,34 +444,44 @@ class ArenaNode(Node):
             self._brick_marker.pose.orientation.z = q[2]
             self._brick_marker.pose.orientation.w = q[3]
             
+            # Check if brick fell off the platform
             dx = abs(self._brick_pose.pose.position.x - self._turtle_pose.x)
-            # if(dx < self._platform_cylinder_radius):
             if(self._physics._brick[2] > self._brick_size_z/2):
+                # Brick is still on the platform
                 self._physics_z_limit = self._platform_height + self._brick_size_z/2 - dx*np.tan(self._tilt_angle)
                 self._physics_pitch = self._tilt_angle
                 self._physics._brick = self._physics.drop(z_limit=self._physics_z_limit, pitch=self._physics_pitch)
             else:
+                # Brick fell off the platform
                 self._physics_z_limit = 0.0
                 self._physics_pitch = 0.0
                 self.get_logger().info("Brick fell off the platform")
                 self._state = SLIDING
         
         elif(self._state == SLIDING):
+            # Check if brick is inside the arena
             self._physics._brick = self._physics.drop(z_limit=self._physics_z_limit, pitch=self._physics_pitch, friction_dx=self._friction_dx)
             x = self._physics._brick[0]
             y = self._physics._brick[1]
             z = self._physics._brick[2]
             if(self._physics._brick[0] <= -0.5+self._brick_size_x/2):
+                # Brick is outside the arena
                 x = -0.5+self._brick_size_x/2
+                # Reverse x velocity to simulate collision
                 self._physics._xdot = -self._physics._xdot
             if(self._physics._brick[0] >= self._arena_width-0.5-self._brick_size_x/2):
+                # Brick is outside the arena
                 x = self._arena_width-0.5-self._brick_size_x/2
+                # Reverse x velocity to simulate collision
                 self._physics._xdot = -self._physics._xdot
             if(self._physics._brick[1] <= -0.5+self._brick_size_y/2):
+                # Brick is outside the arena
                 y = -0.5+self._brick_size_y/2
             if(self._physics._brick[1] >= self._arena_width-0.5-self._brick_size_y/2):
+                # Brick is outside the arena
                 y = self._arena_width-0.5-self._brick_size_y/2
             if(self._physics._brick[2] == self._physics_z_limit):
+                # Brick is on the ground, reset orientation
                 self._brick_pose.pose.orientation.x = 0.0
                 self._brick_pose.pose.orientation.y = 0.0
                 self._brick_pose.pose.orientation.z = 0.0
@@ -479,10 +490,12 @@ class ArenaNode(Node):
                 self._brick_marker.pose.orientation.y = 0.0
                 self._brick_marker.pose.orientation.z = 0.0
                 self._brick_marker.pose.orientation.w = 1.0
+            # Update brick pose
             self._physics._brick[0] = x
             self._physics._brick[1] = y
         
         if(self._tilt_angle != 0.0 and self._state == DROPPED):
+            # Brick is sliding
             self._state = FALLING
     
     
@@ -505,6 +518,7 @@ class ArenaNode(Node):
                 
             self._physics._brick = self._physics.drop(z_limit = self._physics_z_limit)
             if(abs(self._physics._brick[2] - self._physics_z_limit) < self._tolerance):
+                # Brick is on the platform
                 self._x_offset = self._physics.brick[0] - self._turtle_pose.x
                 self._y_offset = self._physics.brick[1] - self._turtle_pose.y
                 self._state = DROPPED
@@ -513,7 +527,8 @@ class ArenaNode(Node):
             # Move brick with the turtle
             self._physics.brick = [self._turtle_pose.x + self._x_offset, self._turtle_pose.y + self._y_offset, self._physics_z_limit]
         
-        elif(self._state == FALLING):            
+        elif(self._state == FALLING):    
+            # Update brick position        
             dx = self._brick_pose.pose.position.x - self._turtle_pose.x
             self._physics_z_limit = self._platform_height + self._brick_size_z/2 - dx*np.tan(self._tilt_angle)
             self._physics_pitch = self._tilt_angle

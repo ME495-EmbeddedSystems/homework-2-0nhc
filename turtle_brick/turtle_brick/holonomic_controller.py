@@ -1,3 +1,6 @@
+"""
+This module contains a controller for holonomic robots to compute velocities needed to reach a goal position.
+"""
 import numpy as np
 
 

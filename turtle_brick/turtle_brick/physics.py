@@ -1,9 +1,11 @@
+"""
+This module contains the physics simulation for the brick object in the virtual world.
+"""
 import numpy as np
 
 
 class World:
     """Class to simulate physics in a virtual world, tracking the position and movement of a brick."""
-
     def __init__(self, brick, gravity, radius, dt):
         """
         Initialize the world with initial brick position, gravity, platform radius, and timestep.
@@ -93,3 +95,4 @@ class World:
 
         self._t += self._dt
         return self._brick
+    
