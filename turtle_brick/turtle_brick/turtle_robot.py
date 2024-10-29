@@ -108,6 +108,13 @@ class TurtleRobotNode(Node):
         t.transform.rotation.w = q[3]
         self._tf_broadcaster.sendTransform(t)
         
+        # Publish joint states
+        self._wheel_position += abs(self._vx) * 1.0/self._timer_frequency
+        self._joint_states.header.stamp = self.get_clock().now().to_msg()
+        self._joint_states.position = [self._tilt_angle, self._th, self._wheel_position]
+        self._joint_states.velocity = [0, 0, 0]
+        self._joint_states.effort = [0, 0, 0]
+        self._joint_states_publisher.publish(self._joint_states)
         
         # Check if goal is reached
         if(self._state == MOVING):
@@ -130,21 +137,14 @@ class TurtleRobotNode(Node):
             
         elif(self._state == STOPPED):
             self._turtle_cmd = Twist()
+            self._vx = 0
+            self._vy = 0
+            self._th = 0
             
         else:
             self.get_logger().warn("Unknown state: "+str(self._state))
         
         self._turtle_cmd_publisher.publish(self._turtle_cmd)
-            
-        
-        
-        # Publish joint states
-        self._wheel_position += abs(self._vx) * 1.0/self._timer_frequency
-        self._joint_states.header.stamp = self.get_clock().now().to_msg()
-        self._joint_states.position = [self._tilt_angle, self._th, self._wheel_position]
-        self._joint_states.velocity = [0, 0, 0]
-        self._joint_states.effort = [0, 0, 0]
-        self._joint_states_publisher.publish(self._joint_states)
     
     
     def _goal_pose_callback(self, msg):
