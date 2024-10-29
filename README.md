@@ -1,14 +1,14 @@
 # TODO
-* Rviz launch order
 * Collision and friction effects
-* Description in setup.py and package.xml
 * test_brick_launch.py
 
 
 # ME495 Embedded Systems Homework 2
 Author: Zhengxiao Han
 
-This package includes an arena node that has a physics engine to simulate a brick falling, a holonomic turtle controller to control the turetle to the reference position, and a catcher node to organize turtle's behaviors so that it can catch the falling brick.
+`turtle_brick`: This package includes an arena node that has a physics engine to simulate a brick falling, a holonomic turtle controller to control the turetle to the reference position, and a catcher node to organize turtle's behaviors so that it can catch the falling brick.
+
+`turtle_brick_interfaces`: Customized message and service interfaces for `turtle_brick`
 
 ## Quickstart
 1. Use `ros2 launch ros2 launch turtle_brick turtle_arena.launch.xml` to start the arena and turtle simulation

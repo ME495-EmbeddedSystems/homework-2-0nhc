@@ -3,7 +3,7 @@
 <package format="3">
   <name>turtle_brick_interfaces</name>
   <version>0.0.0</version>
-  <description>This packages includes customized ROS 2 interfaces</description>
+  <description>Customized message and service interfaces for turtle_brick</description>
   <maintainer email="hanzx@u.northwestern.edu">Zhengxiao Han</maintainer>
   <license>WTFPL</license>
 

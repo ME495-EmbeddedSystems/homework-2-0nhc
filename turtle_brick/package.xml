@@ -3,7 +3,7 @@
 <package format="3">
   <name>turtle_brick</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
+  <description>This package includes an arena node that has a physics engine to simulate a brick falling, a holonomic turtle controller to control the turetle to the reference position, and a catcher node to organize turtle's behaviors so that it can catch the falling brick.</description>
   <maintainer email="hanzx@u.northwestern.edu">Zhengxiao Han</maintainer>
   <license>WTFPL</license>
 
