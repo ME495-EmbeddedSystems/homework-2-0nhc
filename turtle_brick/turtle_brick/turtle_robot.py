@@ -9,6 +9,7 @@ from geometry_msgs.msg import Twist, TransformStamped, PoseStamped
 from sensor_msgs.msg import JointState
 from turtle_brick_interfaces.msg import Tilt
 from std_srvs.srv import Empty
+from nav_msgs.msg import Odometry
 
 from turtle_brick.states import MOVING, STOPPED, REACHED
 from turtle_brick.holonomic_controller import HolonomicController
@@ -59,14 +60,14 @@ class TurtleRobotNode(Node):
         # Setup subscriber for tilt's angle
         self._tilt_subscriber = self.create_subscription(Tilt, '/tilt', self._tilt_callback, 10)
         self._tilt_subscriber  # prevent unused variable warning
-        self._tilt_angle = 0
+        self._tilt_angle = 0.0
         
         # Setup publisher to control the turtle's movements
         self._turtle_cmd_publisher = self.create_publisher(Twist, self._robot_name+'/cmd_vel', 10)
         self._turtle_cmd = Twist()
-        self._vx = 0
-        self._vy = 0
-        self._th = 0
+        self._vx = 0.0
+        self._vy = 0.0
+        self._th = 0.0
         
         # Setup publisher to publish joint states
         self._joint_states_publisher = self.create_publisher(JointState, '/joint_states', 10)
@@ -74,6 +75,10 @@ class TurtleRobotNode(Node):
         self._joint_states.name = ['platform_connector_to_platform', 
                                    'base_link_to_stem',
                                    'stem_to_wheel']
+        
+        # Setup publisher to publish odometry
+        self._odometry_publisher = self.create_publisher(Odometry, '/odom', 10)
+        self._odom = Odometry()
         
         # Setup TF broadcaster
         self._tf_broadcaster = tf2_ros.TransformBroadcaster(self)
@@ -108,6 +113,22 @@ class TurtleRobotNode(Node):
         t.transform.rotation.w = q[3]
         self._tf_broadcaster.sendTransform(t)
         
+        # Publish odometry
+        self._odom.header.stamp = self.get_clock().now().to_msg()
+        self._odom.header.frame_id = 'odom'
+        self._odom.child_frame_id = 'base_link'
+        self._odom.pose.pose.position.x = self._turtle_pose.x
+        self._odom.pose.pose.position.y = self._turtle_pose.y
+        self._odom.pose.pose.position.z = self._base_to_footprint_z
+        self._odom.pose.pose.orientation.x = q[0]
+        self._odom.pose.pose.orientation.y = q[1]
+        self._odom.pose.pose.orientation.z = q[2]
+        self._odom.pose.pose.orientation.w = q[3]
+        self._odom.twist.twist.linear.x = self._vx
+        self._odom.twist.twist.linear.y = self._vy
+        self._odom.twist.twist.angular.z = 0.0
+        self._odometry_publisher.publish(self._odom)
+        
         # Publish joint states
         self._wheel_position += abs(self._vx) * 1.0/self._timer_frequency
         self._joint_states.header.stamp = self.get_clock().now().to_msg()
@@ -137,9 +158,9 @@ class TurtleRobotNode(Node):
             
         elif(self._state == STOPPED):
             self._turtle_cmd = Twist()
-            self._vx = 0
-            self._vy = 0
-            self._th = 0
+            self._vx = 0.0
+            self._vy = 0.0
+            self._th = 0.0
             
         else:
             self.get_logger().warn("Unknown state: "+str(self._state))

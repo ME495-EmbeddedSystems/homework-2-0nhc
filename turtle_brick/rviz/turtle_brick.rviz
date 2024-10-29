@@ -108,6 +108,8 @@ Visualization Manager:
           Value: false
         base_link:
           Value: false
+        brick:
+          Value: true
         odom:
           Value: true
         platform:
@@ -127,6 +129,8 @@ Visualization Manager:
       Show Names: true
       Tree:
         world:
+          brick:
+            {}
           odom:
             base_link:
               base_footprint:
@@ -155,7 +159,7 @@ Visualization Manager:
       Enabled: true
       Name: Marker
       Namespaces:
-        {}
+        boundary: true
       Topic:
         Depth: 5
         Durability Policy: Volatile
@@ -177,6 +181,45 @@ Visualization Manager:
         Reliability Policy: Reliable
         Value: /words
       Value: true
+    - Angle Tolerance: 0.10000000149011612
+      Class: rviz_default_plugins/Odometry
+      Covariance:
+        Orientation:
+          Alpha: 0.5
+          Color: 255; 255; 127
+          Color Style: Unique
+          Frame: Local
+          Offset: 1
+          Scale: 1
+          Value: true
+        Position:
+          Alpha: 0.30000001192092896
+          Color: 204; 51; 204
+          Scale: 1
+          Value: true
+        Value: true
+      Enabled: false
+      Keep: 100
+      Name: Odometry
+      Position Tolerance: 0.10000000149011612
+      Shape:
+        Alpha: 1
+        Axes Length: 1
+        Axes Radius: 0.10000000149011612
+        Color: 255; 25; 0
+        Head Length: 0.30000001192092896
+        Head Radius: 0.10000000149011612
+        Shaft Length: 1
+        Shaft Radius: 0.05000000074505806
+        Value: Arrow
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /odom
+      Value: false
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -230,18 +273,18 @@ Visualization Manager:
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 5.445371627807617
-        Y: 5.548161506652832
-        Z: -0.6276077628135681
+        X: 5.523384094238281
+        Y: 5.375720024108887
+        Z: -0.8424925208091736
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.6853983402252197
+      Pitch: 0.6753983497619629
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 4.708558082580566
+      Yaw: 4.70855712890625
     Saved: ~
 Window Geometry:
   Displays:
