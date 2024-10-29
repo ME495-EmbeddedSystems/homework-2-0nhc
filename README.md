@@ -10,8 +10,8 @@ Author: Zhengxiao Han
 2. Use `ros2 service call /place turtle_brick_interfaces/srv/Place "{x: 6.54445, y: 7.544445, z: 7.0}"` and then `ros2 service call /drop std_srvs/srv/Empty "{}"` to drop a brick
 3. Here is a video of the turtle when the brick is within catching range
 
-https://github.com/user-attachments/assets/45013c58-6f4f-4dd4-b45e-b23ccf49f3d4
+https://github.com/user-attachments/assets/1362b876-16e6-4f83-8f06-ad321058b541
 
 4. Here is a video of the turtle when the brick cannot be caught
 
-https://github.com/user-attachments/assets/07cf788b-a4e8-4f46-9496-0c483045a82a
+https://github.com/user-attachments/assets/381ca313-03f0-48a9-8a66-f1349edca630
