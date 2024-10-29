@@ -302,7 +302,7 @@ class ArenaNode(Node):
                                self._brick_pose.pose.position.z],
                               self._gravity, self._platform_cylinder_radius,
                               1.0/self._physics_frequency)
-        self._physics_z_limit = 0.0
+        self._physics_z_limit = self._brick_size_z/2
         self._physics_pitch = 0.0
 
         # Initialize offsets for carrying the brick
@@ -581,7 +581,7 @@ class ArenaNode(Node):
                     z_limit=self._physics_z_limit, pitch=self._physics_pitch)
             else:
                 # Brick fell off the platform
-                self._physics_z_limit = 0.0
+                self._physics_z_limit = self._brick_size_z/2
                 self._physics_pitch = 0.0
                 self.get_logger().info('Brick fell off the platform')
                 self._state = SLIDING
@@ -648,7 +648,7 @@ class ArenaNode(Node):
                     self._brick_size_z/2
             else:
                 # Brick is outside the platform
-                self._physics_z_limit = 0.0
+                self._physics_z_limit = self._brick_size_z/2
 
             self._physics._brick = self._physics.drop(
                 z_limit=self._physics_z_limit)
