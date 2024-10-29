@@ -27,8 +27,8 @@ class ArenaNode(Node):
         # Declare timer frequency parameter, default to 100 Hz
         self.declare_parameter('frequency', 100.0)
         self._timer_frequency = self.get_parameter("frequency").get_parameter_value().double_value
-        # Declare rainbow frequency parameter, default to 60 Hz
-        self.declare_parameter('rainbow_frequency', 60.0)
+        # Declare rainbow frequency parameter, default to 100 Hz
+        self.declare_parameter('rainbow_frequency', 100.0)
         self._rainbow_frequency = self.get_parameter("rainbow_frequency").get_parameter_value().double_value
         # Declare physics frequency parameter, default to 250 Hz
         self.declare_parameter('physics_frequency', 250.0)
