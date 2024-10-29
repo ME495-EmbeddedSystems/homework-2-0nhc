@@ -1,3 +1,27 @@
+"""The turtle_robot ROS 2 node for hopmework-2.
+
+The turtle_robot node communicates through several ROS 2 protocols:
+
+PUBLISHERS:
+  + turtle1/cmd_vel (geometry_msgs.msg.Twist) - The velocity command to control the turtle
+  + joint_states (sensor_msgs.msg.JointState) - The joint states of the robot
+  + odom (nav_msgs.msg.Odometry) - The odometry of the robot
+
+SUBSCRIBERS:
+  + turtle1/pose (turtlesim.msg.Pose) - The pose state of the turtle
+  + goal_pose (geometry_msgs.msg.PoseStamped) - The goal pose for the turtle to reach
+  + tilt (turtle_brick_interfaces.msg.Tilt) - The platform's rotating angle
+  
+PARAMETERS:
+  + frequency (double) - Timer frequency for the main loop
+  + max_velocity (double) - The maximum velocity of the turtle
+  + kp (double) - The proportional gain for the controller
+  + base_link_length (double) - The length of the base link
+  + stem_height (double) - The height of the stem
+  + wheel_radius (double) - The radius of the wheel
+  + platform_cylinder_radius (double) - The radius of the platform cylinder
+  + robot_name (string) - The robot name (default to "turtle1" in this project)
+"""
 import rclpy
 import tf_transformations
 import tf2_ros
@@ -16,7 +40,36 @@ from turtle_brick.holonomic_controller import HolonomicController
 
 
 class TurtleRobotNode(Node):
+    """The turtle_robot ROS 2 node for hopmework-2.
+
+    The turtle_robot node communicates through several ROS 2 protocols:
+
+    PUBLISHERS:
+    + turtle1/cmd_vel (geometry_msgs.msg.Twist) - The velocity command to control the turtle
+    + joint_states (sensor_msgs.msg.JointState) - The joint states of the robot
+    + odom (nav_msgs.msg.Odometry) - The odometry of the robot
+
+    SUBSCRIBERS:
+    + turtle1/pose (turtlesim.msg.Pose) - The pose state of the turtle
+    + goal_pose (geometry_msgs.msg.PoseStamped) - The goal pose for the turtle to reach
+    + tilt (turtle_brick_interfaces.msg.Tilt) - The platform's rotating angle
+    
+    PARAMETERS:
+    + frequency (double) - Timer frequency for the main loop
+    + max_velocity (double) - The maximum velocity of the turtle
+    + kp (double) - The proportional gain for the controller
+    + base_link_length (double) - The length of the base link
+    + stem_height (double) - The height of the stem
+    + wheel_radius (double) - The radius of the wheel
+    + platform_cylinder_radius (double) - The radius of the platform cylinder
+    + robot_name (string) - The robot name (default to "turtle1" in this project)
+    """
     def __init__(self):
+        """Initialize the TurtleRobotNode.
+
+        Sets up ROS 2 parameters, initializes subscriptions, publishers,
+        timer callbacks, transforms, and robot state.
+        """
         super().__init__('turtle_robot')
         # Declare ROS 2 parameters
         # Declare timer frequency parameter, default to 100 Hz
@@ -98,6 +151,11 @@ class TurtleRobotNode(Node):
         
         
     def _timer_callback(self):
+        """Timer callback for periodic control and state updates.
+
+        Publishes transforms, odometry, and joint states. Updates the
+        turtle's movement based on the current state and controller commands.
+        """
         # Publish turtle pose to TF
         t = TransformStamped()
         t.header.stamp = self.get_clock().now().to_msg()
@@ -155,39 +213,79 @@ class TurtleRobotNode(Node):
                 self._turtle_cmd.linear.x = self._vx
                 self._turtle_cmd.linear.y = self._vy
                 self._turtle_cmd_publisher.publish(self._turtle_cmd)
-            
+        
         elif(self._state == STOPPED):
+            # Stop the turtle
             self._turtle_cmd = Twist()
             self._vx = 0.0
             self._vy = 0.0
             self._th = 0.0
             
         else:
+            # Unknown state
             self.get_logger().warn("Unknown state: "+str(self._state))
         
+        # Publish the command
         self._turtle_cmd_publisher.publish(self._turtle_cmd)
     
     
     def _goal_pose_callback(self, msg):
+        """Callback for receiving goal pose.
+
+        Sets the state to moving and updates the goal pose.
+
+        Args:
+            msg (PoseStamped): The target pose for the turtle robot.
+        """
         if(self._state == STOPPED):
             self._state = MOVING
         self._goal_pose = msg
         
         
     def _turtle_pose_callback(self, msg):
+        """Callback for receiving the turtle's current pose.
+
+        Updates the internal pose state of the turtle robot.
+
+        Args:
+            msg (Pose): The current pose of the turtle.
+        """
         self._turtle_pose.x = msg.x
         self._turtle_pose.y = msg.y
     
     
     def _tilt_callback(self, msg):
+        """Callback for receiving tilt angle data.
+
+        Updates the internal tilt angle state.
+
+        Args:
+            msg (Tilt): Contains the tilt angle for the robot.
+        """
         self._tilt_angle = msg.angle
         
         
     def _euclidean_distance(self, p1, p2):
+        """Calculate Euclidean distance between two points.
+
+        Args:
+            p1 (list[float]): The first point [x, y].
+            p2 (list[float]): The second point [x, y].
+
+        Returns:
+            float: The Euclidean distance between the two points.
+        """
         return np.sqrt(((p1[0] - p2[0])**2 + (p1[1] - p2[1])**2))
         
         
 def main(args=None):
+    """Main entry point for the TurtleRobotNode.
+
+    Initializes the ROS 2 node, spins to process callbacks, and shuts down.
+
+    Args:
+        args (list, optional): Command-line arguments passed to rclpy.init().
+    """
     rclpy.init(args=args)
     turtle_robot_node = TurtleRobotNode()
     rclpy.spin(turtle_robot_node)

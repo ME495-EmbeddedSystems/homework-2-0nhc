@@ -1,3 +1,26 @@
+"""The catcher ROS 2 node for hopmework-2.
+
+The catcher node communicates through several ROS 2 protocols:
+
+PUBLISHERS:
+  + tilt (turtle_brick_interfaces.msg.Tilt) - Indicating the tilt angle of the catcher.
+  + goal_pose (geometry_msgs.msg.PoseStamped) - Indicating the goal pose for the catcher.
+  + words (visualization_msgs.msg.Marker) - Indicating the catcher is unavailable.
+
+SUBSCRIBERS:
+  + arena_state (std_msgs.msg.Float32) - Indicating the state of the arena.
+  + turtle1/pose (turtlesim.msg.Pose) - Indicating the pose of the turtle.
++ brick (visualization_msgs.msg.Marker) - Indicating the pose of the brick.  
+  
+PARAMETERS:
+  + frequency (double) - Timer frequency for the main loop
+  + platform_height (double) - The height of the platform
+  + brick_size_z (double) - The size of the brick in z-axis
+  + max_velocity (double) - The maximum velocity of the robot
+  + gravity (double) - The gravity acceleration
+  + platform_cylinder_radius (double) - The radius of the platform cylinder
+  + robot_name (string) - The name of the robot
+"""
 import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import PoseStamped
@@ -12,8 +35,34 @@ from std_msgs.msg import ColorRGBA
 
 
 class CatcherNode(Node):
+    """The catcher ROS 2 node for hopmework-2.
 
+    The catcher node communicates through several ROS 2 protocols:
+
+    PUBLISHERS:
+    + tilt (turtle_brick_interfaces.msg.Tilt) - Indicating the tilt angle of the catcher.
+    + goal_pose (geometry_msgs.msg.PoseStamped) - Indicating the goal pose for the catcher.
+    + words (visualization_msgs.msg.Marker) - Indicating the catcher is unavailable.
+
+    SUBSCRIBERS:
+    + arena_state (std_msgs.msg.Float32) - Indicating the state of the arena.
+    + turtle1/pose (turtlesim.msg.Pose) - Indicating the pose of the turtle.
+    + brick (visualization_msgs.msg.Marker) - Indicating the pose of the brick.  
+    
+    PARAMETERS:
+    + frequency (double) - Timer frequency for the main loop
+    + platform_height (double) - The height of the platform
+    + brick_size_z (double) - The size of the brick in z-axis
+    + max_velocity (double) - The maximum velocity of the robot
+    + gravity (double) - The gravity acceleration
+    + platform_cylinder_radius (double) - The radius of the platform cylinder
+    + robot_name (string) - The name of the robot
+    """
     def __init__(self):
+        """Initialize the CatcherNode with configurable ROS parameters, publishers, and subscribers.
+
+        Sets up the node's main loop, tilt and goal position publishers, and the arena and brick state subscriptions.
+        """
         super().__init__('catcher')
         # Declare timer frequency parameter, default to 100 Hz
         self.declare_parameter('frequency', 100.0)
@@ -30,9 +79,6 @@ class CatcherNode(Node):
         # Declare gravity acceleration parameter, default to -9.81
         self.declare_parameter('gravity', -9.81)
         self._gravity = self.get_parameter("gravity").get_parameter_value().double_value
-        # Declare number of markers per side parameter, default to 20
-        self.declare_parameter('num_markers_per_side', 50)
-        self._num_markers_per_side = self.get_parameter("num_markers_per_side").get_parameter_value().integer_value
         # Declare platform cylinder radius parameter, default to 0.1
         self.declare_parameter('platform_cylinder_radius', 0.1)
         self._platform_cylinder_radius = self.get_parameter("platform_cylinder_radius").get_parameter_value().double_value
@@ -60,7 +106,7 @@ class CatcherNode(Node):
         self._words = Marker()
         self._words.header.frame_id = 'odom'
         self._words.ns = 'catcher'
-        self._words.id = 4*self._num_markers_per_side+1
+        self._words.id = 0
         self._words.type = Marker.TEXT_VIEW_FACING
         self._words.action = Marker.ADD
         self._words.pose.position.x = 5.544445
@@ -75,8 +121,6 @@ class CatcherNode(Node):
         self._words.color = ColorRGBA(r=1.0, g=0.0, b=0.0, a=1.0)  # Red color, fully opaque
         self._words.lifetime.sec = 3
         self._words.lifetime.nanosec = 0
-        
-        
         
         # Setup subscriber for arena's state
         self._arena_state_subscriber = self.create_subscription(Float32, '/arena_state', self._arena_state_callback, 10)
@@ -96,20 +140,40 @@ class CatcherNode(Node):
         
 
     def _turtle_pose_callback(self, msg):
+        """Callback for updating the turtle's pose.
+
+        Args:
+            msg (Pose): The turtle's current position and orientation.
+        """
         self._turtle_pose.x = msg.x
         self._turtle_pose.y = msg.y
         self._turtle_pose.theta = msg.theta
         
         
     def _brick_callback(self, msg):
+        """Callback for updating the brick's pose.
+
+        Args:
+            msg (Marker): The marker message containing the brick's pose.
+        """
         self._brick_pose = msg.pose
         
         
     def _arena_state_callback(self, msg):
+        """Callback for updating the arena state.
+
+        Args:
+            msg (Float32): The arena state as a floating-point value.
+        """
         self._arena_state = msg.data
         
         
     def _timer_callback(self):
+        """Main loop timer callback for controlling the catcher’s actions based on its state and arena conditions.
+
+        This function checks conditions, updates the catcher's state, and sends commands to catch or clear bricks
+        as needed based on the arena's state and brick position.
+        """
         if(self._arena_state == DROPPING and self._state == INIT):
             # Check if the robot can move to catch the brick on time
             rx, ry = self._turtle_pose.x, self._turtle_pose.y
@@ -160,16 +224,22 @@ class CatcherNode(Node):
         elif(self._state == NONAVAILABLE):
             self._words_publisher.publish(self._words)
             self._state = INIT
-            
-        # self._tilt_publisher.publish(self._tilt_msg)
 
 
 def main(args=None):
+    """Main entry point for the CatcherNode.
+
+    Initializes the ROS 2 node, spins to process callbacks, and shuts down.
+
+    Args:
+        args (list, optional): Command-line arguments passed to rclpy.init().
+    """
     rclpy.init(args=args)
     dummy_node = CatcherNode()
     rclpy.spin(dummy_node)
     dummy_node.destroy_node()
     rclpy.shutdown()
+
 
 if __name__ == '__main__':
     main()

@@ -1,3 +1,37 @@
+"""The arena ROS 2 node for hopmework-2.
+
+The arena node communicates through several ROS 2 protocols:
+
+PUBLISHERS:
+  + boundaries (visualization_msgs.msg.MarkerArray) - The boundaries of the arena
+  + brick (visualization_msgs.msg.Marker) - The brick in the arena
+  + arena_state (std_msgs.msg.Float32) - The state of the arena
+
+SUBSCRIBERS:
+  + turtle1/pose (turtlesim.msg.Pose) - The pose state of the turtle
+  + tilt (turtle_brick_interfaces.msg.Tilt) - The platform's rotating angle
+  
+SERVICES:
+  + place (turtle_brick_interfaces.srv.Place) - To place the brick on the platform
+  + drop (std_srvs.srv.Empty) - To drop the brick from the platform
+  
+PARAMETERS:
+  + frequency (double) - Timer frequency for the main loop
+  + rainbow_frequency (double) - Timer frequency to control the rainbow effect
+  + physics_frequency (double) - Timer frequency to control the physics of the brick
+  + num_markers_per_side (int) - Number of markers per side of the arena
+  + boundary_width (double) - Width of the boundaries
+  + arena_width (double) - Width of the arena
+  + arena_height (double) - Height of the arena
+  + brick_size_x (double) - Size of the brick in the x-axis
+  + brick_size_y (double) - Size of the brick in the y-axis
+  + brick_size_z (double) - Size of the brick in the z-axis
+  + gravity (double) - Gravity acceleration
+  + platform_height (double) - Height of the platform
+  + friction_dx (double) - Friction coefficient
+  + platform_cylinder_radius (double) - Radius of the platform cylinder
+  + robot_name (string) - Name of the robot
+"""
 import rclpy
 from rclpy.node import Node
 from visualization_msgs.msg import MarkerArray, Marker
@@ -21,8 +55,46 @@ import time
 
 
 class ArenaNode(Node):
+    """The arena ROS 2 node for hopmework-2.
 
+    The arena node communicates through several ROS 2 protocols:
+
+    PUBLISHERS:
+    + boundaries (visualization_msgs.msg.MarkerArray) - The boundaries of the arena
+    + brick (visualization_msgs.msg.Marker) - The brick in the arena
+    + arena_state (std_msgs.msg.Float32) - The state of the arena
+
+    SUBSCRIBERS:
+    + turtle1/pose (turtlesim.msg.Pose) - The pose state of the turtle
+    + tilt (turtle_brick_interfaces.msg.Tilt) - The platform's rotating angle
+    
+    SERVICES:
+    + place (turtle_brick_interfaces.srv.Place) - To place the brick on the platform
+    + drop (std_srvs.srv.Empty) - To drop the brick from the platform
+    
+    PARAMETERS:
+    + frequency (double) - Timer frequency for the main loop
+    + rainbow_frequency (double) - Timer frequency to control the rainbow effect
+    + physics_frequency (double) - Timer frequency to control the physics of the brick
+    + num_markers_per_side (int) - Number of markers per side of the arena
+    + boundary_width (double) - Width of the boundaries
+    + arena_width (double) - Width of the arena
+    + arena_height (double) - Height of the arena
+    + brick_size_x (double) - Size of the brick in the x-axis
+    + brick_size_y (double) - Size of the brick in the y-axis
+    + brick_size_z (double) - Size of the brick in the z-axis
+    + gravity (double) - Gravity acceleration
+    + platform_height (double) - Height of the platform
+    + friction_dx (double) - Friction coefficient
+    + platform_cylinder_radius (double) - Radius of the platform cylinder
+    + robot_name (string) - Name of the robot
+    """
     def __init__(self):
+        """Initialize the ArenaNode with configurable ROS parameters.
+
+        Sets up ROS 2 parameters, initializes publishers, subscribers, services, timers,
+        and physics-related attributes for the arena environment.
+        """
         super().__init__('arena')
         # Declare timer frequency parameter, default to 100 Hz
         self.declare_parameter('frequency', 100.0)
@@ -159,22 +231,50 @@ class ArenaNode(Node):
     
 
     def _tilt_callback(self, msg):
+        """Callback for tilt angle updates.
+
+        Args:
+            msg (Tilt): The tilt angle message.
+        """
         self._tilt_angle = msg.angle
         
             
     def _turtle_pose_callback(self, msg):
+        """Callback for receiving the turtle's pose.
+
+        Args:
+            msg (Pose): The current pose of the turtle in the arena.
+        """
         self._turtle_pose.x = msg.x
         self._turtle_pose.y = msg.y
         self._turtle_pose.theta = msg.theta
         
         
     def _drop_callback(self, request, response):
+        """Callback to handle the '/drop' service, updating the arena state.
+
+        Args:
+            request (Empty): Empty service request.
+            response (Empty): Empty service response.
+
+        Returns:
+            Empty: The response after handling the drop request.
+        """
         if(self._state == PLACED):
             self._state = DROPPING
         return response
     
     
     def _place_callback(self, request, response):
+        """Callback to handle the '/place' service, updating brick position.
+
+        Args:
+            request (Place): Contains target position coordinates (x, y, z) for the brick.
+            response (Place.Response): Response indicating success or failure of placement.
+
+        Returns:
+            Place.Response: The updated response with success set to True.
+        """
         # Update brick position
         new_position = [request.x, request.y, request.z]
         self._physics.brick = new_position
@@ -185,6 +285,14 @@ class ArenaNode(Node):
     
     
     def _init_boundaries(self, num_markers_per_side, boundary_width, arena_width, arena_height):
+        """Initialize arena boundaries with markers.
+
+        Args:
+            num_markers_per_side (int): Number of markers on each boundary side.
+            boundary_width (float): Width of each boundary.
+            arena_width (float): Width of the arena.
+            arena_height (float): Height of the arena.
+        """
         # Side 1
         for i in range(0, num_markers_per_side):
             x=-0.5-boundary_width/2
@@ -247,6 +355,18 @@ class ArenaNode(Node):
         
         
     def _generate_marker(self, id, x, y, z, qx, qy, qz, qw, scale_x, scale_y, scale_z, r=0.0, g=0.0, b=1.0, a=1.0):
+        """Generate a visual marker with specified properties.
+
+        Args:
+            id (int): Unique ID for the marker.
+            x, y, z (float): Position coordinates for the marker.
+            qx, qy, qz, qw (float): Orientation quaternion values.
+            scale_x, scale_y, scale_z (float): Scale dimensions of the marker.
+            r, g, b, a (float): Color RGBA values.
+
+        Returns:
+            Marker: A configured marker object.
+        """
         marker = Marker()
         marker.header.frame_id = "world"
         marker.header.stamp = self.get_clock().now().to_msg()
@@ -271,6 +391,11 @@ class ArenaNode(Node):
         
         
     def _main_loop_timer_callback(self):
+        """Timer callback for the main loop, publishing state and boundary updates.
+
+        Publishes the current state, updates boundaries, and handles brick pose based on the
+        arena state and physics.
+        """
         # Publish arena state
         self._arena_state_msg.data = float(self._state)
         self._arena_state_publisher.publish(self._arena_state_msg)
@@ -362,6 +487,11 @@ class ArenaNode(Node):
     
     
     def _physics_timer_callback(self):
+        """Timer callback for physics updates, handling brick dropping and sliding.
+
+        Updates brick position based on physics and changes state as necessary based on the
+        brick's position and interactions.
+        """
         if(self._state == DROPPING):
             # Check if brick is inside the platform
             distance = np.sqrt((self._brick_pose.pose.position.x - self._turtle_pose.x)**2+
@@ -391,6 +521,10 @@ class ArenaNode(Node):
     
     
     def _rainbow_timer_callback(self):
+        """Timer callback for dynamically changing marker colors based on a rainbow pattern.
+
+        Uses time-based color adjustments to simulate a rainbow effect on boundary markers.
+        """
         elapsed_time = time.time() - self._start_time
         for idx in range(self._num_markers_in_boundaries):
             color = self.get_rainbow_color(idx / self._num_markers_in_boundaries + elapsed_time)
@@ -400,6 +534,14 @@ class ArenaNode(Node):
     
     
     def get_rainbow_color(self, position):
+        """Calculate color in the rainbow spectrum based on position.
+
+        Args:
+            position (float): Position value to generate the color
+
+        Returns:
+            ColorRGBA: Color with calculated RGB values and full opacity.
+        """
         r = max(0.0, math.sin(position * 2 * math.pi + 0) * 0.5 + 0.5)
         g = max(0.0, math.sin(position * 2 * math.pi + 2 * math.pi / 3) * 0.5 + 0.5)
         b = max(0.0, math.sin(position * 2 * math.pi + 4 * math.pi / 3) * 0.5 + 0.5)
@@ -407,11 +549,20 @@ class ArenaNode(Node):
     
 
 def main(args=None):
+    """Main entry point for the ArenaNode.
+
+    Initializes the ROS 2 node, spins to process callbacks, and shuts down.
+
+    Args:
+        args (list, optional): Command-line arguments passed to rclpy.init().
+    """
     rclpy.init(args=args)
     dummy_node = ArenaNode()
     rclpy.spin(dummy_node)
     dummy_node.destroy_node()
     rclpy.shutdown()
 
+
 if __name__ == '__main__':
     main()
+    

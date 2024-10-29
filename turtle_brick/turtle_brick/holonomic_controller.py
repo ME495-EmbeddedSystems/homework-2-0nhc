@@ -2,12 +2,31 @@ import numpy as np
 
 
 class HolonomicController:
+    """A controller for holonomic robots to compute velocities needed to reach a goal position."""
     def __init__(self, max_vel, kp) -> None:
+        """
+        Initialize the HolonomicController with maximum velocity and proportional gain.
+
+        Args:
+            max_vel (float): The maximum velocity the robot can achieve.
+            kp (float): Proportional gain for the angular velocity control.
+        """
         self._max_vel = max_vel
         self._kp = kp
     
 
     def holonomic_control(self, current_state, goal):
+        """
+        Compute the velocities required to move the robot towards a goal.
+
+        Args:
+            current_state (tuple): The current state of the robot as (x, y, theta).
+            goal (tuple): The goal position as (xg, yg).
+
+        Returns:
+            tuple: A tuple (vel_x, vel_y, vel_theta) representing the computed velocities 
+                   along x, y, and theta to move towards the goal.
+        """
         # Load args for programming convenience
         x = current_state[0]
         y = current_state[1]
